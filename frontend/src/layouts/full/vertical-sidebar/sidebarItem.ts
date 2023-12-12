@@ -44,6 +44,11 @@ const sidebarItem: menu[] = [
     icon: 'mdi-puzzle',
     to: '/extension'
   },
+  {
+    title: '控制台',
+    icon: 'mdi-console',
+    to: '/console'
+  },
 ];
 
 export default sidebarItem;

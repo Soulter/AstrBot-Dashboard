@@ -11,6 +11,12 @@
           <h4 class="text-h4 font-weight-medium">23 天 12 时 32 秒</h4>
           <span class="text-subtitle-2 text-medium-emphasis text-white">运行时间</span>
         </div>
+        <v-spacer></v-spacer>
+        <div>
+          <v-btn icon rounded="sm" variant="plain">
+            <v-icon color="black" icon="mdi-stop" size="32"></v-icon>
+          </v-btn>
+        </div>
       </div>
     </v-card-text>
   </v-card>

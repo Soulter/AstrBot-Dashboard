@@ -14,12 +14,12 @@ const MainRoutes = {
     {
       name: 'Extensions',
       path: '/extension',
-      component: () => import('@/views/StarterPage.vue')
+      component: () => import('@/views/ExtensionPage.vue')
     },
     {
       name: 'Configs',
       path: '/config',
-      component: () => import('@/views/StarterPage.vue')
+      component: () => import('@/views/ConfigPage.vue')
     },
 
     {
