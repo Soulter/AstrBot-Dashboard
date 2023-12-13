@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue';
 import { ChevronUpIcon, ChevronDownIcon } from 'vue-tabler-icons';
 
@@ -138,3 +138,28 @@ const platforms = ref([
     </v-card>
   </v-card>
 </template>
+
+
+<script>
+
+export default {
+  name: 'PlatformStat',
+  components: {
+  },
+  props: ['stat'],
+  watch: {
+    stat: {
+      handler: function (val, oldVal) {
+        this.stat = val;
+      },
+      deep: true
+    }
+  },
+  data: () => ({
+
+  }),
+
+  mounted() {
+  }
+};
+</script>

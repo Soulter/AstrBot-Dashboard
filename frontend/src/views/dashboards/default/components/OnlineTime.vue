@@ -8,7 +8,7 @@
           <v-icon icon="mdi-clock"></v-icon>
         </v-btn>
         <div>
-          <h4 class="text-h4 font-weight-medium">23 天 12 时 32 秒</h4>
+          <h4 class="text-h4 font-weight-medium">?? 天 ?? 时 ?? 秒</h4>
           <span class="text-subtitle-2 text-medium-emphasis text-white">运行时间</span>
         </div>
         <v-spacer></v-spacer>
@@ -28,10 +28,38 @@
           <v-icon icon="mdi-memory"></v-icon>
         </v-btn>
         <div>
-          <h4 class="text-h4 font-weight-medium">51.3 MiB</h4>
+          <h4 class="text-h4 font-weight-medium">{{ memory }} MiB</h4>
+
           <span class="text-subtitle-2 text-disabled font-weight-medium">占用内存</span>
         </div>
       </div>
     </v-card-text>
   </v-card>
 </template>
+
+
+<script>
+
+export default {
+  name: 'OnlineTime',
+  components: {
+  },
+  props: ['stat'],
+  watch: {
+    stat: {
+      handler: function (val, oldVal) {
+        this.memory = val.sys_perf.memory
+      },
+      deep: true
+    }
+  },
+  data: () => ({
+    _stat: {},
+    memory: "Loading"
+  }),
+
+  mounted() {
+  }
+};
+
+</script>

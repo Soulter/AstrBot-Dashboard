@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { shallowRef } from 'vue';
 import { ArchiveIcon, CopyIcon, DownloadIcon, FileExportIcon, HttpDeleteIcon } from 'vue-tabler-icons';
 import iconCard from '@/assets/images/icons/icon-card.svg';
@@ -35,9 +35,25 @@ const items = shallowRef([
         </div>
       </div>
       <h2 class="text-h1 font-weight-medium">
-        67489
+        ??
       </h2>
       <span class="text-subtitle-1 text-medium-emphasis text-white">消息总数</span>
     </v-card-text>
   </v-card>
 </template>
+
+<script>
+
+export default {
+  name: 'TotalMessage',
+  components: {
+  },
+  props: ['stat'],
+  data: () => ({
+    stat: {}
+  }),
+
+  mounted() {
+  }
+};
+</script>

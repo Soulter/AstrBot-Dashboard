@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue';
 
 const select = ref({ state: 'Today', abbr: 'FL' });
@@ -93,7 +93,7 @@ const lineChart1 = {
         <v-row>
           <v-col cols="12" sm="9">
             <span class="text-subtitle-2 text-disabled font-weight-bold">上行消息总趋势</span>
-            <h3 class="text-h3 mt-1">12,345</h3>
+            <h3 class="text-h3 mt-1">??</h3>
           </v-col>
           <v-col cols="12" sm="3">
             <v-select
@@ -119,3 +119,19 @@ const lineChart1 = {
     </v-card>
   </v-card>
 </template>
+
+<script>
+
+export default {
+  name: 'MessageStat',
+  components: {
+  },
+  props: ['stat'],
+  data: () => ({
+  }),
+
+  mounted() {
+  }
+};
+
+</script>

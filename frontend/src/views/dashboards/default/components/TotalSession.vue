@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue';
 import { ArrowDownLeftCircleIcon, ShoppingCartIcon, CircleArrowDownLeftIcon } from 'vue-tabler-icons';
 
@@ -139,7 +139,7 @@ const lineChart2 = {
           <v-row>
             <v-col cols="6">
               <h2 class="text-h1 font-weight-medium">
-                167
+                ??
               </h2>
               <span class="text-subtitle-1 text-medium-emphasis text-white">会话总数</span>
             </v-col>
@@ -165,3 +165,20 @@ const lineChart2 = {
     </v-card-text>
   </v-card>
 </template>
+
+
+<script>
+
+export default {
+  name: 'TotalSession',
+  components: {
+  },
+  props: ['stat'],
+  data: () => ({
+    stat: {}
+  }),
+
+  mounted() {
+  }
+};
+</script>
