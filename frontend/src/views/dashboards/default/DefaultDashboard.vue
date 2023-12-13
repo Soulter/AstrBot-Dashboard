@@ -5,6 +5,11 @@ import TotalSession from './components/TotalSession.vue';
 import OnlineTime from './components/OnlineTime.vue';
 import MessageStat from './components/MessageStat.vue';
 import PlatformStat from './components/PlatformStat.vue';
+import axios from 'axios';
+
+axios.get('/api/stats').then((res) => {
+  console.log(res.data.data);
+});
 </script>
 
 <template>

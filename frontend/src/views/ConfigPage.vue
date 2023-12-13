@@ -1,85 +1,7 @@
-<script setup lang="ts">
-import { ref, shallowRef } from 'vue';
-
+<script setup>
 import UiParentCard from '@/components/shared/UiParentCard.vue';
+import axios from 'axios';
 
-const page = ref({ title: 'Sample Page' });
-
-const data_str = `
-{
-    "data": [
-        {
-            "type": "group",
-            "name": "机器人平台配置",
-            "description": "机器人平台配置描述",
-            "body": [
-                {
-                    "type": "item",
-                    "val_type": "bool",
-                    "name": "启用 QQ 频道平台",
-                    "description": "机器人平台名称描述",
-                    "value": true
-                },
-                {
-                    "type": "item",
-                    "val_type": "string",
-                    "name": "QQ机器人APPID",
-                    "description": "机器人平台名称描述",
-                    "value": "123456"
-                },
-                {
-                    "type": "item",
-                    "val_type": "string",
-                    "name": "QQ机器人令牌",
-                    "description": "机器人平台名称描述",
-                    "value": "123456"
-                },
-                {
-                    "type": "divider"
-                },
-                {
-                    "type": "item",
-                    "val_type": "bool",
-                    "name": "启用 GO-CQHTTP 平台",
-                    "description": "机器人平台名称描述",
-                    "value": false
-                }
-            ]
-        },
-        {
-            "type": "group",
-            "name": "代理配置",
-            "description": "代理配置描述",
-            "body": [
-                {
-                    "type": "item",
-                    "val_type": "string",
-                    "name": "代理地址",
-                    "description": "代理配置描述",
-                    "value": "http://localhost:7890"
-                }
-            ]
-        },
-        {
-            "type": "group",
-            "name": "其他配置",
-            "description": "其他配置描述",
-            "body": [
-                {
-                    "type": "item",
-                    "val_type": "string",
-                    "name": "回复前缀",
-                    "description": "[xxxx] 你好！ 其中xxxx是你可以填写的前缀。如果为空则不显示。",
-                    "value": "GPT"
-                }
-            ]
-        }
-                
-    ]
-}
-`
-
-const config_data = JSON.parse(data_str);
 </script>
 
 <template>
@@ -90,7 +12,7 @@ const config_data = JSON.parse(data_str);
       <UiParentCard v-for="group in config_data.data" :key="group.name" :title="group.name" style="margin-bottom: 16px;">
         <!-- 对group内的数组进行解析。如果val_type是bool，则用vuetify的单选；以此类推-->
         <template v-for="item in group.body">
-          <template v-if="item.type === 'item'">
+          <template v-if="item.config_type === 'item'">
             <template v-if="item.val_type === 'bool'">
               <v-switch v-model="item.value" :label="item.name" :hint="item.description" color="primary" inset></v-switch>
             </template>
@@ -98,7 +20,7 @@ const config_data = JSON.parse(data_str);
               <v-text-field v-model="item.value" :label="item.name" :hint="item.description" style="margin-bottom: 8px;" variant="outlined"></v-text-field>
             </template>
           </template>
-          <template v-else-if="item.type === 'divider'">
+          <template v-else-if="item.config_type === 'divider'">
             <v-divider style="margin-top: 8px; margin-bottom: 8px;"></v-divider>
           </template>
         </template>
@@ -106,6 +28,62 @@ const config_data = JSON.parse(data_str);
     </v-col>
   </v-row>
 
-  <v-btn icon="mdi-content-save" size="x-large" style="position: fixed; right: 52px; bottom: 52px;" color="darkprimary">
+  <v-btn icon="mdi-content-save" size="x-large" style="position: fixed; right: 52px; bottom: 52px;" color="darkprimary" @click="updateConfig">
   </v-btn>
+
+  <v-snackbar
+      :timeout="2000"
+      elevation="24"
+      :color="save_message_success"
+      v-model="save_message_snack"
+    >
+      {{ save_message  }}
+  </v-snackbar>
 </template>
+
+
+<script>
+
+export default {
+  name: 'ConfigPage',
+  components: {
+    UiParentCard
+  },
+  data() {
+    return {
+      config_data: {
+        "data": []
+      },
+      save_message_snack: false,
+      save_message: "",
+      save_message_success: ""
+    }
+  },
+  mounted() {
+    this.getConfig();
+  },
+  methods: {
+    getConfig() {
+      axios.get('/api/configs').then((res) => {
+        this.config_data = res.data.data;
+        console.log(this.config_data);
+      });
+    },
+    updateConfig() {
+      axios.post('/api/configs', this.config_data).then((res) => {
+        console.log(this.config_data)
+        if (res.data.status === "success") {
+          this.save_message = res.data.message;
+          this.save_message_snack = true;
+          this.save_message_success = "success";
+        } else {
+          this.save_message = res.data.message;
+          this.save_message_snack = true;
+          this.save_message_success = "error";
+        }
+      });
+    }
+  },
+}
+
+</script>
