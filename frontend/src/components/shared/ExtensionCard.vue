@@ -4,7 +4,7 @@ const props = defineProps({
   link: String
 });
 
-const open = (link: string) => {
+const open = (link: string | undefined) => {
   window.open(link, '_blank');
 };
 </script>
