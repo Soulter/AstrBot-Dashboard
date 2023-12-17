@@ -139,7 +139,7 @@ const lineChart2 = {
           <v-row>
             <v-col cols="6">
               <h2 class="text-h1 font-weight-medium">
-                ??
+                {{ session_total }}
               </h2>
               <span class="text-subtitle-1 text-medium-emphasis text-white">会话总数</span>
             </v-col>
@@ -152,7 +152,7 @@ const lineChart2 = {
           <v-row>
             <v-col cols="6">
               <h2 class="text-h1 font-weight-medium">
-                198
+                {{ session_total }}
               </h2>
               <span class="text-subtitle-1 text-medium-emphasis text-white">会话总数</span>
             </v-col>
@@ -174,8 +174,16 @@ export default {
   components: {
   },
   props: ['stat'],
+  watch: {
+    stat: {
+      handler: function (val, oldVal) {
+        this.session_total = val.session_total
+      },
+      deep: true
+    }
+  },
   data: () => ({
-    stat: {}
+    session_total: 0,
   }),
 
   mounted() {

@@ -51,20 +51,7 @@ const lineChart1 = {
   ]
 };
 
-const platforms = ref([
-  {
-    name: 'QQ 群',
-    count: 14124
-  },
-  {
-    name: 'QQ 频道',
-    count: 612
-  },
-  {
-    name: 'Discord',
-    count: 123
-  }
-]);
+
 </script>
 
 <template>
@@ -150,13 +137,33 @@ export default {
   watch: {
     stat: {
       handler: function (val, oldVal) {
-        this.stat = val;
+        // 根据platform name汇总，累加
+        let platform_map = {}
+        for (let i = 0; i < val.platform.length; i++) {
+          const platform = val.platform[i];
+          if (platform_map[platform[1]]) {
+            platform_map[platform[1]] += platform[2]
+          } else {
+            platform_map[platform[1]] = platform[2]
+          }
+        }
+        this.platforms = []
+        for (const key in platform_map) {
+          if (Object.hasOwnProperty.call(platform_map, key)) {
+            const count = platform_map[key];
+            this.platforms.push({
+              name: key,
+              count: count
+            })
+          }
+        }
       },
-      deep: true
+      deep: true,
     }
   },
   data: () => ({
-
+    platforms: [
+    ]
   }),
 
   mounted() {

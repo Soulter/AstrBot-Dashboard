@@ -35,7 +35,7 @@ const items = shallowRef([
         </div>
       </div>
       <h2 class="text-h1 font-weight-medium">
-        ??
+        {{ message_total }}
       </h2>
       <span class="text-subtitle-1 text-medium-emphasis text-white">消息总数</span>
     </v-card-text>
@@ -49,8 +49,16 @@ export default {
   components: {
   },
   props: ['stat'],
+  watch: {
+    stat: {
+      handler: function (val, oldVal) {
+        this.message_total = val.message_total
+      },
+      deep: true
+    }
+  },
   data: () => ({
-    stat: {}
+    message_total: 0,
   }),
 
   mounted() {

@@ -1,89 +1,5 @@
 <script setup>
 import { ref, computed } from 'vue';
-
-const select = ref({ state: 'Today', abbr: 'FL' });
-const items = [
-  { state: '今天', abbr: 'FL' },
-  { state: '今月', abbr: 'GA' },
-  { state: '今年', abbr: 'NE' }
-];
-
-// chart 1
-const chartOptions1 = computed(() => {
-  return {
-    chart: {
-      type: 'bar',
-      height: 400,
-      fontFamily: `inherit`,
-      foreColor: '#a1aab2',
-      stacked: true
-    },
-    // colors: ['#eef2f6', '#1e88e5', '#5e35b1', '#ede7f6'],
-    colors: ['#1e88e5', '#5e35b1', '#ede7f6'],
-    responsive: [
-      {
-        breakpoint: 400,
-        options: {
-          legend: {
-            position: 'bottom',
-            offsetX: -10,
-            offsetY: 0
-          }
-        }
-      }
-    ],
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: '50%'
-      }
-    },
-    xaxis: {
-      type: 'category',
-      categories: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-    },
-    legend: {
-      show: true,
-      fontFamily: `'Roboto', sans-serif`,
-      position: 'bottom',
-      offsetX: 20,
-      labels: {
-        useSeriesColors: false
-      },
-      markers: {
-        width: 16,
-        height: 16,
-        radius: 5
-      },
-      itemMargin: {
-        horizontal: 15,
-        vertical: 8
-      }
-    },
-    fill: {
-      type: 'solid'
-    },
-    dataLabels: {
-      enabled: false
-    },
-    grid: {
-      show: true
-    },
-    tooltip: {
-      theme: 'dark'
-    }
-  };
-});
-
-// chart 1
-const lineChart1 = {
-  series: [
-    {
-      name: '消息条数',
-      data: [35, 145, 35, 35, 20, 105, 100, 10, 65, 45, 30, 10]
-    }
-  ]
-};
 </script>
 
 <template>
@@ -93,7 +9,7 @@ const lineChart1 = {
         <v-row>
           <v-col cols="12" sm="9">
             <span class="text-subtitle-2 text-disabled font-weight-bold">上行消息总趋势</span>
-            <h3 class="text-h3 mt-1">??</h3>
+            <h3 class="text-h3 mt-1">{{ total_cnt }}</h3>
           </v-col>
           <v-col cols="12" sm="3">
             <v-select
@@ -113,7 +29,7 @@ const lineChart1 = {
           </v-col>
         </v-row>
         <div class="mt-4">
-          <apexchart type="bar" height="280" :options="chartOptions1" :series="lineChart1.series"> </apexchart>
+          <apexchart type="bar" height="280" :options="chartOptions1" :series="lineChart1.series" ref="rtchart"> </apexchart>
         </div>
       </v-card-text>
     </v-card>
@@ -128,9 +44,133 @@ export default {
   },
   props: ['stat'],
   data: () => ({
+    total_cnt: 0,
+    select: { state: 'Today', abbr: 'FL' },
+    items: [
+      { state: '过去 24 小时', abbr: 'FL' },
+      { state: '更多维度待开发喵!', abbr: 'GA' },
+    ],
+    // chart 1
+    chartOptions1: {
+      chart: {
+        type: 'bar',
+        height: 400,
+        fontFamily: `inherit`,
+        foreColor: '#a1aab2',
+        stacked: true
+      },
+      // colors: ['#eef2f6', '#1e88e5', '#5e35b1', '#ede7f6'],
+      colors: ['#1e88e5', '#5e35b1', '#ede7f6'],
+      responsive: [
+        {
+          breakpoint: 400,
+          options: {
+            legend: {
+              position: 'bottom',
+              offsetX: -10,
+              offsetY: 0
+            }
+          }
+        }
+      ],
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '50%'
+        }
+      },
+      xaxis: {
+        type: 'category',
+        categories: []
+      },
+      legend: {
+        show: true,
+        fontFamily: `'Roboto', sans-serif`,
+        position: 'bottom',
+        offsetX: 20,
+        labels: {
+          useSeriesColors: false
+        },
+        markers: {
+          width: 16,
+          height: 16,
+          radius: 5
+        },
+        itemMargin: {
+          horizontal: 15,
+          vertical: 8
+        }
+      },
+      fill: {
+        type: 'solid'
+      },
+      dataLabels: {
+        enabled: false
+      },
+      grid: {
+        show: true
+      },
+      tooltip: {
+        theme: 'dark'
+      }
+    },
+    lineChart1: {
+      series: [
+        {
+          name: '消息条数',
+          // 24小时
+          data: []
+        }
+      ]
+    },
   }),
 
+  watch: {
+    stat: {
+      handler: function (val, oldVal) {
+        let x_labels = []
+        let y_values = []
+
+        for (let i = 0; i < val.message.length; i++) {
+          let date = new Date(val.message[i][0] * 1000)
+          let hour = date.getHours()
+          let minute = date.getMinutes()
+          minute = minute < 10 ? "0" + minute : minute
+          x_labels.push(hour + ":" + minute)
+          y_values.push(val.message[i][1])
+          this.total_cnt += val.message[i][1]
+        }
+        // this.$refs.rtchart.updateSeries([
+        //   {
+        //     name: '消息条数',
+        //     data: y_values
+        //   }
+        // ])
+        // this.$refs.rtchart.updateOptions([
+        //   {
+        //     xaxis: {
+        //       type: 'category',
+        //       categories: x_labels
+        //     }
+        //   }
+        // ])
+
+        this.$refs.rtchart.updateOptions({
+          xaxis: {
+              categories: x_labels
+          },
+          series: [{
+              data: y_values
+          }],
+        });
+        
+      },
+      deep: true
+    }
+  },
+
   mounted() {
+
   }
 };
 
