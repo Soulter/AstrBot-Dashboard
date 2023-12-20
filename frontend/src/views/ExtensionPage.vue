@@ -20,7 +20,7 @@ import axios from 'axios';
           <v-icon>mdi-account</v-icon>
           <span>{{ extension.author }}</span>
           <v-spacer></v-spacer>
-          <v-btn variant="plain">卸 载[待开发]</v-btn>
+          <v-btn variant="plain" @click="uninstallExtension(extension.name)">卸 载[待开发]</v-btn>
         </div>
       </ExtensionCard>
     </v-col>
@@ -30,6 +30,55 @@ import axios from 'axios';
       </div>
     </v-col>
   </v-row>
+
+  <v-dialog
+        v-model="dialog"
+        persistent
+        width="700"
+      >
+        <template v-slot:activator="{ props }">
+          <v-btn v-bind="props" icon="mdi-content-plus" size="x-large" style="position: fixed; right: 52px; bottom: 52px;" color="darkprimary">
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title>
+            <span class="text-h5">从 Git 仓库链接安装插件</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field
+                    label="Git 库链接"
+                    v-model="extension_url"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+            <small>github, gitee, gitlab 等公开的仓库都行。</small>
+            <br>
+            <small>{{ status }}</small>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="blue-darken-1"
+              variant="text"
+              @click="dialog = false"
+            >
+              关闭
+            </v-btn>
+            <v-btn
+              color="blue-darken-1"
+              variant="text"
+              @click="newExtension(extension_url)"
+            >
+              安装
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 </template>
 
 <script>
@@ -46,7 +95,10 @@ export default {
       },
       save_message_snack: false,
       save_message: "",
-      save_message_success: ""
+      save_message_success: "",
+      extension_url: "",
+      status: "",
+      dialog: false
     }
   },
   mounted() {
@@ -59,6 +111,25 @@ export default {
         console.log(this.extension_data);
       });
     },
+    newExtension() {
+      axios.post('/api/extensions/install',
+      {
+        url: this.extension_url
+      }).then((res) => {
+        this.extension_data.data = res.data.data;
+        console.log(this.extension_data);
+        this.extension_url = "";
+      });
+    },
+    uninstallExtension(extension_name) {
+      axios.post('/api/extensions/uninstall',
+      {
+        name: extension_name
+      }).then((res) => {
+        this.extension_data.data = res.data.data;
+        console.log(this.extension_data);
+      });
+    }
   },
 }
 
