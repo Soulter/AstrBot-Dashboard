@@ -1,7 +1,6 @@
 <script setup>
 import { shallowRef } from 'vue';
 import { ArchiveIcon, CopyIcon, DownloadIcon, FileExportIcon, HttpDeleteIcon } from 'vue-tabler-icons';
-import iconCard from '@/assets/images/icons/icon-card.svg';
 const items = shallowRef([
   { title: '移除', icon: HttpDeleteIcon },
 ]);

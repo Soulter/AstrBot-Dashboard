@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { router } from '@/router';
 import { fetchWrapper } from '@/utils/helpers/fetch-wrapper';
+import axios from 'axios';
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
 
@@ -13,12 +14,17 @@ export const useAuthStore = defineStore({
   }),
   actions: {
     async login(username: string, password: string) {
-      const user = await fetchWrapper.post(`${baseUrl}/authenticate`, { username, password });
-
-      // pinia
-      this.user = user;
-      localStorage.setItem('user', JSON.stringify(user));
-      router.push(this.returnUrl || '/dashboard/default');
+      axios.post('/api/authenticate', {
+        username: username,
+        password: password
+      }).then((res) => {
+        console.log("auth", res)
+        this.user = res.data.data
+        localStorage.setItem('user', JSON.stringify(this.user));
+        router.push(this.returnUrl || '/dashboard/default');
+      });
+      // const user = await fetchWrapper.post(`${baseUrl}/authenticate`, { username, password });
+      // this.user = user;
     },
     logout() {
       this.user = null;

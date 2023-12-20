@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import Google from '@/assets/images/auth/social-google.svg';
 import { useAuthStore } from '@/stores/auth';
 import { Form } from 'vee-validate';
+import md5 from 'js-md5';
 
 const checkbox = ref(false);
 const valid = ref(false);
@@ -11,13 +11,16 @@ const show1 = ref(false);
 const password = ref('');
 const username = ref('');
 const passwordRules = ref([
-  (v: string) => !!v || '需要填写：密码',
-  (v: string) => (v && v.length <= 10) || 'Password must be less than 10 characters'
+  (v: string) => !!v || '需要填写：密码'
 ]);
-const emailRules = ref([(v: string) => !!v || '需要填写：用户名', (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid']);
+const emailRules = ref([(v: string) => !!v || '需要填写：用户名']);
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function validate(values: any, { setErrors }: any) {
+  // md5加密
+  if (password.value != '')
+    // @ts-ignore
+    password.value = md5(password.value);
   const authStore = useAuthStore();
   return authStore.login(username.value, password.value).catch((error) => setErrors({ apiError: error }));
 }

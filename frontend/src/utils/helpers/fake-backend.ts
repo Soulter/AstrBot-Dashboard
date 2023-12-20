@@ -6,7 +6,6 @@ function fakeBackend() {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   window.fetch = function (url: any, opts: any) {
     return new Promise((resolve: any, reject) => {
-      // wrap in timeout to simulate server api call
       setTimeout(handleRoute, 500);
 
       function handleRoute() {
