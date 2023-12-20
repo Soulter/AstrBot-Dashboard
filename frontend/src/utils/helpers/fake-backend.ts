@@ -1,7 +1,7 @@
 export { fakeBackend };
 
 function fakeBackend() {
-  const users = [{ id: 1, username: '', password: '', firstName: 'Codedthemes', lastName: '.com' }];
+  const users = [{ id: 1, username: '', password: '', firstName: 'AstrBot', lastName: 'dev' }];
   const realFetch = window.fetch;
   /* eslint-disable @typescript-eslint/no-explicit-any */
   window.fetch = function (url: any, opts: any) {
@@ -23,13 +23,11 @@ function fakeBackend() {
       }
 
       // route functions
-
       function authenticate() {
         const { username, password } = body();
-        const user: any = users.find((x) => x.username === username && x.password === password);
-
+        // const user: any = users.find((x) => x.username === username && x.password === password);
+        const user: any = users[0]
         if (!user) return error('Username or password is incorrect');
-
         return ok({
           id: user.id,
           username: user.username,
