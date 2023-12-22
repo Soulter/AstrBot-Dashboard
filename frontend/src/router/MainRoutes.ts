@@ -28,9 +28,9 @@ const MainRoutes = {
       component: () => import('@/views/dashboards/default/DefaultDashboard.vue')
     },
     {
-      name: 'Starter',
-      path: '/starter',
-      component: () => import('@/views/StarterPage.vue')
+      name: 'Console',
+      path: '/console',
+      component: () => import('@/views/ConsolePage.vue')
     },
     {
       name: 'Tabler Icons',
