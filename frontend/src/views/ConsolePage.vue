@@ -38,9 +38,9 @@ export default {
       }
     );
     this.term.open(document.getElementById('terminal'));
-    for (let i = 0; i < 200; i++) {
-      this.term.write('AstrBot Console By xterm && Soulter')
-    }
+    this.term.write('AstrBot Console By xterm && Soulter\n')
+    this.term.write('🚧 施工中 🚧\n')
+    this.term.write('此 Console 暂时不可用。\n')
   },
   methods: {
   },
