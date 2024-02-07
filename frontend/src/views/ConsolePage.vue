@@ -1,13 +1,16 @@
 <script setup>
-import { ref, shallowRef } from 'vue';
-
-import ExtensionCard from '@/components/shared/ExtensionCard.vue';
-import axios from 'axios';
 import {Terminal} from 'xterm';
+import 'xterm/css/xterm.css'
 
 </script>
 
 <template>
+  <div style="background-color: white; width: 100%; padding: 8px; padding-left: 16px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+    <h3>{{ status }}</h3>
+    <v-btn color="primary" variant="text" @click="handleConnection">
+      {{ connection_status }}
+    </v-btn>
+  </div>
   <div style="width: 100%; height: 100%; background-color: #fff; padding: 16px; border-radius: 10px;">
     <div id="terminal" style=""></div>
   </div>
@@ -22,40 +25,65 @@ export default {
   },
   data() {
     return {
-      term: null
+      term: null,
+      websocket: null,
+      status: '',
+      connection_status: '连接'
     }
   },
   mounted() {
     this.term = new Terminal({
-        // rendererType: "canvas", //渲染类型
-        rows: 35,
-        cols: 100, // 不指定行数，自动回车后光标从下一行开始
-
+        rendererType: "canvas", //渲染类型
+        rows: 28,
+        cols: 100,
         theme: {
           foreground: "#000", //字体
           background: "#ffffff", //背景色
+          cursor: "#000", //光标
+          convertEol: true, //自动换行
         }
       }
     );
     this.term.open(document.getElementById('terminal'));
-    this.term.write('AstrBot Console By xterm && Soulter\n')
-    this.term.write('🚧 施工中 🚧\n')
-    this.term.write('此 Console 暂时不可用。\n')
+    // websockets
+    this.createWebSocket()
   },
   methods: {
+    createWebSocket() {
+      this.status = '正在连接'
+      this.websocket = new WebSocket('ws://localhost:6186');
+      this.status = '已连接'
+      this.connection_status = '断开'
+      this.websocket.onopen = () => {
+        console.log('WebSocket连接已打开');
+      };
+      this.websocket.onerror = (error) => {
+        console.error('WebSocket发生错误:', error);
+      };
+      this.websocket.onclose = () => {
+        console.log('WebSocket连接已关闭');
+      };
+      this.websocket.onmessage = (evt) => {
+        this.term.write(evt.data + '\r\n')
+      }
+    },
+    handleConnection() {
+      if (this.connection_status === '连接') {
+        this.createWebSocket()
+      } else {
+        this.websocket.close()
+        this.term.write('已手动断开连接。\r\n')
+        this.status = '未连接'
+        this.connection_status = '连接'
+      }
+    }
   },
+  beforeUnmount() {
+    this.websocket.close()
+  }
 }
 
 </script>
 
 <style>
-/* .xterm-helper-textarea {
-  display: none;
-}
-.xterm-char-measure-element {
-  color: #fff;
-}
-.xterm-scroll-area {
-  display: none;
-} */
 </style>

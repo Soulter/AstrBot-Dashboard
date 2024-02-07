@@ -14,6 +14,7 @@ function searchbox() {
   showSearch.value = !showSearch.value;
 }
 let dialog = ref(false);
+let updateStatusDialog = ref(false);
 let password = ref('');
 let newPassword = ref('');
 let status = ref('');
@@ -140,7 +141,38 @@ function passwordChange() {
             </v-btn>
           </v-card-actions>
         </v-card>
-      </v-dialog>
+    </v-dialog>
+
+    <v-dialog
+        v-model="updateStatusDialog"
+        width="700"
+      >
+        <template v-slot:activator="{ props }">
+          <v-btn class="profileBtn text-primary" color="lightprimary" variant="flat" rounded="pill" v-bind="props">
+              <v-icon icon="mdi-update" size="25" ></v-icon>
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title>
+            <span class="text-h5">更新项目</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+             <p>此功能正在开发中，你可以在消息平台内使用 `/update` 指令来更新。</p>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="blue-darken-1"
+              variant="text"
+              @click="updateStatusDialog = false"
+            >
+              关闭
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+    </v-dialog>
 
     <v-btn class="profileBtn text-primary" 
       color="lightprimary" 
