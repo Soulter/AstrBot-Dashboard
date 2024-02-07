@@ -51,7 +51,8 @@ export default {
   methods: {
     createWebSocket() {
       this.status = '正在连接'
-      this.websocket = new WebSocket('ws://localhost:6186');
+      
+      this.websocket = new WebSocket('ws://' +  window.location.hostname + ':6186');
       this.status = '已连接'
       this.connection_status = '断开'
       this.websocket.onopen = () => {

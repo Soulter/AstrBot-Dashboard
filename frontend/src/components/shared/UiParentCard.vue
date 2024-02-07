@@ -4,7 +4,6 @@ const props = defineProps({
 });
 </script>
 
-// ===============================|| Ui Parent Card||=============================== //
 <template>
   <v-card variant="outlined" elevation="0" class="withbg">
     <v-card-item>
