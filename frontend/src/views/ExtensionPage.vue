@@ -71,54 +71,47 @@ import axios from 'axios';
       </v-card>
   </v-dialog>
 
-  <v-dialog
-        v-model="dialog"
-        persistent
-        width="700"
-      >
-        <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" icon="mdi-plus" size="x-large" style="position: fixed; right: 52px; bottom: 52px;" color="darkprimary">
-          </v-btn>
-        </template>
-        <v-card>
-          <v-card-title>
-            <span class="text-h5">从 Git 仓库链接安装插件</span>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    label="Git 库链接"
-                    v-model="extension_url"
-                    required
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-            </v-container>
-            <small>github, gitee, gitlab 等公开的仓库都行。</small>
-            <br>
-            <small>{{ status }}</small>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="blue-darken-1"
-              variant="text"
-              @click="dialog = false"
-            >
-              关闭
-            </v-btn>
-            <v-btn
-              color="blue-darken-1"
-              variant="text"
-              :loading="install_loading"
-              @click="newExtension(extension_url)"
-            >
-              安装
-            </v-btn>
-          </v-card-actions>
-        </v-card>
+  <v-dialog v-model="dialog" persistent width="700">
+    <template v-slot:activator="{ props }">
+      <v-btn v-bind="props" icon="mdi-plus" size="x-large" style="position: fixed; right: 52px; bottom: 52px;"
+        color="darkprimary">
+      </v-btn>
+    </template>
+    <v-card>
+      <v-card-title>
+        <span class="text-h5">安装插件</span>
+      </v-card-title>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <h3>从 GitHub 上在线下载</h3>
+            <v-col cols="12">
+              <small>请输入合法的 GitHub 仓库链接，当前仅支持 GitHub。如：https://github.com/Soulter/astrbot_plugin_aiocqhttp</small>
+              <v-text-field label="仓库链接" v-model="extension_url" variant="outlined" required></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <h3>从本机上传 .zip 压缩包</h3>
+            <v-col cols="12">
+              <small>请保证插件文件存在压缩包根目录中的第一个文件夹中（即类似于从 GitHub 仓库页上下载的 Zip 压缩包的格式）。</small>
+              <v-file-input label="选择文件" v-model="upload_file" accept=".zip" outlined required></v-file-input>
+            </v-col>
+          </v-row>
+        </v-container>
+
+        <br>
+        <small>{{ status }}</small>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
+          关闭
+        </v-btn>
+        <v-btn color="blue-darken-1" variant="text" :loading="install_loading" @click="newExtension(extension_url)">
+          安装
+        </v-btn>
+      </v-card-actions>
+    </v-card>
   </v-dialog>
 
   <v-snackbar
@@ -154,12 +147,18 @@ export default {
       uninstall_loading: false,
       configDialog: false,
       extension_config: {},
+      upload_file: null
     }
   },
   mounted() {
     this.getExtensions();
   },
   methods: {
+    toast(message, success) {
+      this.snack_message = message;
+      this.snack_show = true;
+      this.snack_success = success;
+    },
     getExtensions() {
       axios.get('/api/extensions').then((res) => {
         this.extension_data.data = res.data.data;
@@ -167,34 +166,63 @@ export default {
       });
     },
     newExtension() {
+      if (this.extension_url === "" && this.upload_file === null) {
+        this.toast("请填写插件链接或上传插件文件", "error");
+        return;
+      }
+
+      if (this.extension_url !== "" && this.upload_file !== null) {
+        this.toast("请不要同时填写插件链接和上传插件文件", "error");
+        return;
+      }
+
       this.install_loading = true;
-      console.log(this.install_loading);
-      axios.post('/api/extensions/install',
-      {
-        url: this.extension_url
-      }).then((res) => {
-        this.install_loading = false;
-        if (res.data.status === "error") {
-          this.snack_message = res.data.message;
-          this.snack_show = true;
-          this.snack_success = "error";
-          return;
-        }
-        this.extension_data.data = res.data.data;
-        console.log(this.extension_data);
-        this.extension_url = "";
-        this.snack_message = res.data.message;
-        this.snack_show = true;
-      
-        this.snack_success = "success";
-        this.dialog = false;
-        this.getExtensions();
-      }).catch((err) => {
-        this.install_loading = false;
-        this.snack_message = err;
-        this.snack_show = true;
-        this.snack_success = "error";
-      });
+      if (this.upload_file !== null) {
+        const formData = new FormData();
+        formData.append('file', this.upload_file[0]);
+        axios.post('/api/extensions/upload-install', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }).then((res) => {
+          this.install_loading = false;
+          if (res.data.status === "error") {
+            this.toast(res.data.message, "error");
+            return;
+          }
+          this.extension_data.data = res.data.data;
+          console.log(this.extension_data);
+          this.upload_file = "";
+          this.toast(res.data.message, "success");
+          this.dialog = false;
+          this.getExtensions();
+        }).catch((err) => {
+          this.install_loading = false;
+          this.toast(err, "error");
+        });
+        return;
+      } else {
+        axios.post('/api/extensions/install',
+          {
+            url: this.extension_url
+          }).then((res) => {
+            this.install_loading = false;
+            if (res.data.status === "error") {
+              this.toast(res.data.message, "error");
+              return;
+            }
+            this.extension_data.data = res.data.data;
+            console.log(this.extension_data);
+            this.extension_url = "";
+            this.toast(res.data.message, "success");
+            this.dialog = false;
+            this.getExtensions();
+          }).catch((err) => {
+            this.install_loading = false;
+            this.toast(err, "error");
+          });
+
+      }
     },
     uninstallExtension(extension_name) {
       this.uninstall_loading = true;
@@ -204,23 +232,17 @@ export default {
       }).then((res) => {
         this.uninstall_loading = false;
         if (res.data.status === "error") {
-          this.snack_message = res.data.message;
-          this.snack_show = true;
-          this.snack_success = "error";
+          this.toast(res.data.message, "error");
           return;
         }
         this.extension_data.data = res.data.data;
         console.log(this.extension_data);
-        this.snack_message = res.data.message;
-        this.snack_show = true;
-        this.snack_success = "success";
+        this.toast(res.data.message, "success");
         this.dialog = false;
         this.getExtensions();
       }).catch((err) => {
         this.uninstall_loading = false;
-        this.snack_message = err;
-        this.snack_show = true;
-        this.snack_success = "error";
+        this.toast(err, "error");
       });
     },
     updateExtension(extension_name) {
@@ -231,23 +253,17 @@ export default {
       }).then((res) => {
         this.update_loading = false;
         if (res.data.status === "error") {
-          this.snack_message = res.data.message;
-          this.snack_show = true;
-          this.snack_success = "error";
+          this.toast(res.data.message, "error");
           return;
         }
         this.extension_data.data = res.data.data;
         console.log(this.extension_data);
-        this.snack_message = res.data.message;
-        this.snack_show = true;
-        this.snack_success = "success";
+        this.toast(res.data.message, "success");
         this.dialog = false;
         this.getExtensions();
       }).catch((err) => {
         this.update_loading = false;
-        this.snack_message = err;
-        this.snack_show = true;
-        this.snack_success = "error";
+        this.toast(err, "error");
       });
     },
     openExtensionConfig(extension_name) {
@@ -257,9 +273,7 @@ export default {
         this.extension_config = res.data.data;
         console.log(this.extension_config);
       }).catch((err) => {
-        this.snack_message = err;
-        this.snack_show = true;
-        this.snack_success = "error";
+        this.toast(err, "error");
       });
     },
     updateConfig() {
@@ -268,18 +282,12 @@ export default {
         "namespace": this.curr_namespace
       }).then((res) => {
         if (res.data.status === "success") {
-          this.snack_message = res.data.message;
-          this.snack_show = true;
-          this.snack_success = "success";
+          this.toast(res.data.message, "success");
         } else {
-          this.snack_message = res.data.message;
-          this.snack_show = true;
-          this.snack_success = "error";
+          this.toast(res.data.message, "error");
         }
       }).catch((err) => {
-        this.snack_message = err;
-        this.snack_show = true;
-        this.snack_success = "error";
+        this.toast(err, "error");
       });
     }
   },
