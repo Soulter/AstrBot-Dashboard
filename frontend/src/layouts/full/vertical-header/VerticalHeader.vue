@@ -18,6 +18,9 @@ let updateStatusDialog = ref(false);
 let password = ref('');
 let newPassword = ref('');
 let status = ref('');
+let updateStatus = ref('')
+let hasNewVersion = ref(false);
+let version = ref('');
 
 const open = (link: string) => {
   window.open(link, '_blank');
@@ -54,6 +57,38 @@ function passwordChange() {
       status.value = err
       password.value = '';
       newPassword.value = '';
+    });
+}
+
+function checkUpdate() {
+  updateStatus.value = '正在检查更新...';
+  axios.get('/api/check_update')
+    .then((res) => {
+      hasNewVersion.value = res.data.data.has_new_version;
+      updateStatus.value = res.data.message;
+    })
+    .catch((err) => {
+      console.log(err);
+      updateStatus.value = err
+    });
+}
+
+function switchVersion(version: string) {
+  updateStatus.value = '正在切换版本...';
+  axios.post('/api/update_project', {
+      version: version
+    })
+    .then((res) => {
+      updateStatus.value = res.data.message;
+      if (res.data.status == 'success') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      updateStatus.value = err
     });
 }
 </script>
@@ -148,7 +183,7 @@ function passwordChange() {
         width="700"
       >
         <template v-slot:activator="{ props }">
-          <v-btn class="profileBtn text-primary" color="lightprimary" variant="flat" rounded="pill" v-bind="props">
+          <v-btn @click="checkUpdate" class="profileBtn text-primary" color="lightprimary" variant="flat" rounded="pill" v-bind="props">
               <v-icon icon="mdi-update" size="25" ></v-icon>
           </v-btn>
         </template>
@@ -158,7 +193,29 @@ function passwordChange() {
           </v-card-title>
           <v-card-text>
             <v-container>
-             <p>此功能正在开发中，你可以在消息平台内使用 `/update` 指令来更新。</p>
+             <p>{{ updateStatus }}</p>
+             <v-btn
+              @click="switchVersion('latest')"
+              color="primary" class="ml-2" style="border-radius: 10px;"
+              v-show="hasNewVersion">
+              更新到最新版本
+            </v-btn>
+
+            <v-divider></v-divider>
+            <div style="margin-top: 16px;">
+              <p>切换到指定版本</p>
+              <v-text-field
+                label="版本号。如v3.1.3"
+                v-model="version"
+                required
+              ></v-text-field>
+              <v-btn
+                color="primary" class="ml-2" style="border-radius: 10px;"
+                @click="switchVersion(version)">
+                切换到指定版本
+              </v-btn>
+
+            </div>
             </v-container>
           </v-card-text>
           <v-card-actions>

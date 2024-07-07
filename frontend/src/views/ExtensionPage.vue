@@ -2,6 +2,8 @@
 import { ref, shallowRef } from 'vue';
 
 import ExtensionCard from '@/components/shared/ExtensionCard.vue';
+import ConfigDetailCard from '@/components/shared/ConfigDetailCard.vue';
+
 import axios from 'axios';
 
 </script>
@@ -16,11 +18,13 @@ import axios from 'axios';
     <v-col cols="12" md="6" lg="4" v-for="extension in extension_data.data" >
       <ExtensionCard :key="extension.name" :title="extension.name" :link="extension.repo" style="margin-bottom: 16px;">
         <p style="min-height: 180px; max-height: 180px; overflow: hidden;">{{ extension.desc }}</p>
-        <div class="d-flex align-center gap-3">
+        <div class="d-flex align-center gap-2">
           <v-icon>mdi-account</v-icon>
           <span>{{ extension.author }}</span>
           <v-spacer></v-spacer>
-          <v-btn variant="plain" @click="uninstallExtension(extension.name)" :loading="uninstall_loading">卸 载</v-btn>
+          <v-btn variant="plain" @click="openExtensionConfig(extension.name)" v-bind="props">配置</v-btn>
+          <v-btn variant="plain" @click="updateExtension(extension.name)" :loading="update_loading">更新</v-btn>
+          <v-btn variant="plain" @click="uninstallExtension(extension.name)" :loading="uninstall_loading">卸载</v-btn>
         </div>
       </ExtensionCard>
     </v-col>
@@ -29,7 +33,43 @@ import axios from 'axios';
         <h3>🧩 插件市场 [待开发]</h3>
       </div>
     </v-col>
+
   </v-row>
+
+  <v-dialog
+      v-model="configDialog"
+      width="750"
+    >
+      <template v-slot:activator="{ props }">
+      </template>
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">插件配置</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <ConfigDetailCard :config="extension_config"></ConfigDetailCard>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="updateConfig"
+          >
+          保存并关闭
+          </v-btn>
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="configDialog = false"
+          >
+            关闭
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+  </v-dialog>
 
   <v-dialog
         v-model="dialog"
@@ -81,7 +121,7 @@ import axios from 'axios';
         </v-card>
   </v-dialog>
 
-    <v-snackbar
+  <v-snackbar
     :timeout="2000"
     elevation="24"
     :color="snack_success"
@@ -96,16 +136,14 @@ import axios from 'axios';
 export default {
   name: 'ExtensionPage',
   components: {
-    ExtensionCard
+    ExtensionCard,
+    ConfigDetailCard
   },
   data() {
     return {
       extension_data: {
         "data": []
       },
-      save_message_snack: false,
-      save_message: "",
-      save_message_success: "",
       extension_url: "",
       status: "",
       dialog: false,
@@ -113,7 +151,9 @@ export default {
       snack_show: false,
       snack_success: "success",
       install_loading: false,
-      uninstall_loading: false
+      uninstall_loading: false,
+      configDialog: false,
+      extension_config: {},
     }
   },
   mounted() {
@@ -178,6 +218,65 @@ export default {
         this.getExtensions();
       }).catch((err) => {
         this.uninstall_loading = false;
+        this.snack_message = err;
+        this.snack_show = true;
+        this.snack_success = "error";
+      });
+    },
+    updateExtension(extension_name) {
+      this.update_loading = true;
+      axios.post('/api/extensions/update',
+      {
+        name: extension_name
+      }).then((res) => {
+        this.update_loading = false;
+        if (res.data.status === "error") {
+          this.snack_message = res.data.message;
+          this.snack_show = true;
+          this.snack_success = "error";
+          return;
+        }
+        this.extension_data.data = res.data.data;
+        console.log(this.extension_data);
+        this.snack_message = res.data.message;
+        this.snack_show = true;
+        this.snack_success = "success";
+        this.dialog = false;
+        this.getExtensions();
+      }).catch((err) => {
+        this.update_loading = false;
+        this.snack_message = err;
+        this.snack_show = true;
+        this.snack_success = "error";
+      });
+    },
+    openExtensionConfig(extension_name) {
+      this.curr_namespace = extension_name;
+      this.configDialog = true;
+      axios.get('/api/configs?namespace='+extension_name).then((res) => {
+        this.extension_config = res.data.data;
+        console.log(this.extension_config);
+      }).catch((err) => {
+        this.snack_message = err;
+        this.snack_show = true;
+        this.snack_success = "error";
+      });
+    },
+    updateConfig() {
+      axios.post('/api/configs', {
+        "config": this.extension_config,
+        "namespace": this.curr_namespace
+      }).then((res) => {
+        if (res.data.status === "success") {
+          this.snack_message = res.data.message;
+          this.snack_show = true;
+          this.snack_success = "success";
+        } else {
+          this.snack_message = res.data.message;
+          this.snack_show = true;
+          this.snack_success = "error";
+        }
+      }).catch((err) => {
         this.snack_message = err;
         this.snack_show = true;
         this.snack_success = "error";
