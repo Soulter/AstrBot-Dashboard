@@ -1,6 +1,4 @@
 <script setup>
-import { ref, shallowRef } from 'vue';
-
 import ExtensionCard from '@/components/shared/ExtensionCard.vue';
 import ConfigDetailCard from '@/components/shared/ConfigDetailCard.vue';
 
@@ -277,7 +275,7 @@ export default {
       });
     },
     updateConfig() {
-      axios.post('/api/configs', {
+      axios.post('/api/extension-configs', {
         "config": this.extension_config,
         "namespace": this.curr_namespace
       }).then((res) => {
