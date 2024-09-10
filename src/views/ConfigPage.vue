@@ -19,7 +19,7 @@ import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
     <v-tabs-window v-model="tab">
       <v-tabs-window-item v-if="tab === 0">
         <v-container fluid>
-          <h2>已配置的消息平台</h2>
+          <h2>消息平台</h2>
 
           <v-tabs style="margin-top: 16px;" v-model="tabPlatform" align-tabs="left" color="deep-purple-accent-4">
             <v-tab v-for="(item, index) in config_data.platform" :key="index" :value="index">
@@ -34,7 +34,7 @@ import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
             </v-tabs-window-item>
           </v-tabs-window>
 
-          <h2 style="margin-bottom: 16px; margin-top: 16px">消息平台通用配置</h2>
+          <h2 style="margin-bottom: 16px; margin-top: 16px">通用配置</h2>
           <!-- platform_settings -->
           <AstrBotConfig :metadata="metadata" :iterable="config_data.platform_settings" metadataKey="platform_settings"></AstrBotConfig>
         </v-container>
@@ -42,7 +42,7 @@ import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
 
       <v-tabs-window-item v-if="tab === 1">
         <v-container fluid>
-          <h2>已配置的 LLM 渠道</h2>
+          <h2>LLM</h2>
           <v-tabs v-model="tabLLM" align-tabs="left" color="deep-purple-accent-4">
             <v-tab v-for="(item, index) in config_data.llm" :key="index" :value="index">
               {{ item.name }}
@@ -58,7 +58,7 @@ import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
           </v-tabs-window>
 
 
-          <h2 style="margin-bottom: 16px;">大语言模型通用配置</h2>
+          <h2 style="margin-bottom: 16px;">通用配置</h2>
           <!-- llm_settings -->
           <AstrBotConfig :metadata="metadata" :iterable="config_data.llm_settings" metadataKey="llm_settings"></AstrBotConfig>
         </v-container>
@@ -177,3 +177,9 @@ export default {
 }
 
 </script>
+
+<style>
+.v-tab {
+  text-transform: none !important;
+}
+</style>
