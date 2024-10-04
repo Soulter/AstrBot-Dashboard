@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useCustomizerStore } from '../../../stores/customizer';
-// Icon Imports
-import { Menu2Icon } from 'vue-tabler-icons';
 import axios from 'axios';
 import { md5 } from 'js-md5';
 import { useAuthStore } from '@/stores/auth';
-
 
 const customizer = useCustomizerStore();
 const showSearch = ref(false);
@@ -91,6 +88,9 @@ function switchVersion(version: string) {
       updateStatus.value = err
     });
 }
+
+checkUpdate();
+
 </script>
 
 <template>
@@ -104,7 +104,7 @@ function switchVersion(version: string) {
       @click.stop="customizer.SET_MINI_SIDEBAR(!customizer.mini_sidebar)"
       size="small"
     >
-      <Menu2Icon size="20" stroke-width="1.5" />
+      <v-icon>mdi-menu</v-icon>
     </v-btn>
     <v-btn
       class="hidden-lg-and-up text-secondary ms-3"
@@ -115,10 +115,77 @@ function switchVersion(version: string) {
       @click.stop="customizer.SET_SIDEBAR_DRAWER"
       size="small"
     >
-      <Menu2Icon size="20" stroke-width="1.5" />
+      <v-icon>mdi-menu</v-icon>
     </v-btn>
 
     <v-spacer />
+
+    <div class="mr-4">
+      <small v-if="hasNewVersion">
+        有新版本！
+      </small>
+  
+      <small v-else>
+        当前版本已是最新
+      </small>
+    </div>
+
+
+    <v-dialog
+        v-model="updateStatusDialog"
+        width="700"
+      >
+        <template v-slot:activator="{ props }">
+          <v-btn @click="checkUpdate" class="text-primary mr-4" color="lightprimary" variant="flat" rounded="sm" v-bind="props">
+            更新 🔄
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title>
+            <span class="text-h5">更新项目</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+             <h3 class="mb-4">检查更新</h3>
+             <p>{{ updateStatus }}</p>
+             <v-btn
+              class="mt-4 mb-4"
+              @click="switchVersion('latest')"
+              color="primary" style="border-radius: 10px;"
+              :disabled="!hasNewVersion"
+              >
+              更新到最新版本
+            </v-btn>
+            <v-divider></v-divider>
+            <div style="margin-top: 16px;">
+              <h3 class="mb-4">切换到指定版本</h3>
+              <v-text-field
+                label="版本号。如v3.1.3"
+                v-model="version"
+                required
+                variant="outlined"
+              ></v-text-field>
+              <v-btn
+                color="error" style="border-radius: 10px;"
+                @click="switchVersion(version)">
+                确定切换
+              </v-btn>
+
+            </div>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="blue-darken-1"
+              variant="text"
+              @click="updateStatusDialog = false"
+            >
+              关闭
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+    </v-dialog>
 
     <v-dialog
         v-model="dialog"
@@ -126,8 +193,8 @@ function switchVersion(version: string) {
         width="700"
       >
         <template v-slot:activator="{ props }">
-          <v-btn class="profileBtn text-primary" color="lightprimary" variant="flat" rounded="pill" v-bind="props">
-              <v-icon icon="mdi-account-edit" size="25" ></v-icon>
+          <v-btn class="text-primary mr-4" color="lightprimary" variant="flat" rounded="sm" v-bind="props">
+              密码修改 📰
           </v-btn>
         </template>
         <v-card>
@@ -143,6 +210,7 @@ function switchVersion(version: string) {
                     type="password"
                     v-model="password"
                     required
+                    variant="outlined"
                   ></v-text-field>
 
                   <v-text-field
@@ -150,6 +218,7 @@ function switchVersion(version: string) {
                     type="password"
                     v-model="newPassword"
                     required
+                    variant="outlined"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -178,65 +247,9 @@ function switchVersion(version: string) {
         </v-card>
     </v-dialog>
 
-    <v-dialog
-        v-model="updateStatusDialog"
-        width="700"
-      >
-        <template v-slot:activator="{ props }">
-          <v-btn @click="checkUpdate" class="profileBtn text-primary" color="lightprimary" variant="flat" rounded="pill" v-bind="props">
-              <v-icon icon="mdi-update" size="25" ></v-icon>
-          </v-btn>
-        </template>
-        <v-card>
-          <v-card-title>
-            <span class="text-h5">更新项目</span>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-             <p>{{ updateStatus }}</p>
-             <v-btn
-              @click="switchVersion('latest')"
-              color="primary" class="ml-2" style="border-radius: 10px;"
-              v-show="hasNewVersion">
-              更新到最新版本
-            </v-btn>
 
-            <v-divider></v-divider>
-            <div style="margin-top: 16px;">
-              <p>切换到指定版本</p>
-              <v-text-field
-                label="版本号。如v3.1.3"
-                v-model="version"
-                required
-              ></v-text-field>
-              <v-btn
-                color="primary" class="ml-2" style="border-radius: 10px;"
-                @click="switchVersion(version)">
-                切换到指定版本
-              </v-btn>
-
-            </div>
-            </v-container>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="blue-darken-1"
-              variant="text"
-              @click="updateStatusDialog = false"
-            >
-              关闭
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-    </v-dialog>
-
-    <v-btn class="profileBtn text-primary" 
-      color="lightprimary" 
-      variant="flat" 
-      @click="open('https://github.com/Soulter/AstrBot')"
-      rounded="pill">
-        <v-icon icon="mdi-github" size="25" ></v-icon>
+    <v-btn class="text-primary mr-4" @click="open('https://github.com/Soulter/AstrBot')" color="lightprimary" variant="flat" rounded="sm">
+      GitHub Star! 🌟
     </v-btn>
   </v-app-bar>
 </template>
