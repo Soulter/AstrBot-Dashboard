@@ -24,32 +24,51 @@ const sidebarMenu = shallowRef(sidebarItems);
     :rail="customizer.mini_sidebar"
     expand-on-hover
   >
-    <!---Logo part -->
-
     <div class="pa-5">
       <Logo />
     </div>
-    <!-- ---------------------------------------------- -->
-    <!---Navigation -->
-    <!-- ---------------------------------------------- -->
     <perfect-scrollbar class="scrollnavbar">
       <v-list class="pa-4">
-        <!---Menu Loop -->
         <template v-for="(item, i) in sidebarMenu" :key="i">
-          <!---Item Sub Header -->
           <NavGroup :item="item" v-if="item.header" :key="item.title" />
-          <!---Item Divider -->
           <v-divider class="my-3" v-else-if="item.divider" />
-          <!---If Has Child -->
           <NavCollapse class="leftPadding" :item="item" :level="0" v-else-if="item.children" />
-          <!---Single Item-->
           <NavItem :item="item" v-else class="leftPadding" />
-          <!---End Single Item-->
         </template>
       </v-list>
       <div class="pa-4 text-center">
-        <v-chip color="inputBorder" size="small"> v1.0.0 </v-chip>
+        <v-chip color="inputBorder" size="small"> v{{version}} </v-chip>
       </div>
     </perfect-scrollbar>
   </v-navigation-drawer>
 </template>
+
+<script lang="ts">
+import axios from 'axios';
+export default {
+  name: 'VerticalSidebar',
+  components: {
+    NavGroup,
+    NavItem,
+    NavCollapse,
+    Logo,
+  },
+  data: () => ({
+    version: "-",
+  }),
+  mounted() {
+    this.get_version()
+  },
+  methods: {
+    get_version() {
+      axios.get('/api/stat/version')
+        .then((res) => {
+          this.version = res.data.data.version;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  },
+};
+</script>

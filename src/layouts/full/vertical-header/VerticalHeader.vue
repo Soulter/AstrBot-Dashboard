@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useCustomizerStore } from '../../../stores/customizer';
 // Icon Imports
-import { BellIcon, SettingsIcon, SearchIcon, Menu2Icon } from 'vue-tabler-icons';
+import { Menu2Icon } from 'vue-tabler-icons';
 import axios from 'axios';
 import { md5 } from 'js-md5';
 import { useAuthStore } from '@/stores/auth';
@@ -34,7 +34,7 @@ function passwordChange() {
     password.value = md5(password.value);
   }
   newPassword.value = md5(newPassword.value);
-  axios.post('/api/change_password', {
+  axios.post('/api/auth/password/reset', {
       password: password.value,
       new_password: newPassword.value
     })
@@ -62,7 +62,7 @@ function passwordChange() {
 
 function checkUpdate() {
   updateStatus.value = '正在检查更新...';
-  axios.get('/api/check_update')
+  axios.get('/api/update/check')
     .then((res) => {
       hasNewVersion.value = res.data.data.has_new_version;
       updateStatus.value = res.data.message;
@@ -75,7 +75,7 @@ function checkUpdate() {
 
 function switchVersion(version: string) {
   updateStatus.value = '正在切换版本...';
-  axios.post('/api/update_project', {
+  axios.post('/api/update/do', {
       version: version
     })
     .then((res) => {

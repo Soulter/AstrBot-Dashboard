@@ -39,7 +39,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://45.137.181.8:6185/',
+        target: 'http://localhost:6185/',
         changeOrigin: true,
       }
     }

@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { ChevronUpIcon, ChevronDownIcon } from 'vue-tabler-icons';
 
 // chart 1
 const chartOptions1 = computed(() => {
@@ -51,7 +50,6 @@ const lineChart1 = {
   ]
 };
 
-
 </script>
 
 <template>
@@ -59,58 +57,23 @@ const lineChart1 = {
     <v-card variant="outlined">
       <v-card-text>
         <div class="d-flex align-center">
-          <h4 class="text-h4 mt-1">各平台上行消息数</h4>
-          <div class="ml-auto">
-            <v-menu transition="slide-y-transition">
-              <template v-slot:activator="{ props }">
-                <v-btn color="primary" size="small" icon rounded="sm" variant="text" v-bind="props">
-                  <DotsIcon stroke-width="1.5" width="25" />
-                </v-btn>
-              </template>
-              <v-sheet rounded="md" width="150" class="elevation-10">
-                <v-list>
-                  <v-list-item value="1">
-                    <v-list-item-title>今天</v-list-item-title>
-                  </v-list-item>
-                  <v-list-item value="2">
-                    <v-list-item-title>今月</v-list-item-title>
-                  </v-list-item>
-                  <v-list-item value="3">
-                    <v-list-item-title>今年</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-sheet>
-            </v-menu>
-          </div>
+          <h4 class="text-h4 mt-1">各平台消息数</h4>
         </div>
-
-        <!-- <v-card class="bg-lightsecondary mt-5">
-          <div class="pa-5">
-            <div class="d-flex align-start justify-space-between">
-              <div>
-                <h6 class="text-secondary text-h5">QQ 群</h6>
-              </div>
-              <h4 class="text-h4">12183</h4>
-            </div>
-          </div>
-          <apexchart type="area" height="95" :options="chartOptions1" :series="lineChart1.series"> </apexchart>
-        </v-card> -->
         <div class="mt-4">
-          <perfect-scrollbar v-bind:style="{ height: '270px' }">
-            <v-list lines="two" class="py-0">
-              <v-list-item v-for="(platform, i) in platforms" :key="i" :value="platform" color="secondary" rounded="sm">
-                <div class="d-inline-flex align-center justify-space-between w-100">
-                  <div>
-                    <h6 class="text-subtitle-1 text-medium-emphasis font-weight-bold">
-                      {{ platform.name }}
-                    </h6>
-                  </div>
-
-                  <div class="ml-auto text-subtitle-1 text-medium-emphasis font-weight-bold">{{ platform.count }} 条</div>
+          <v-list lines="two" class="py-0" style="height: 270px;">
+            
+            <v-list-item v-for="(platform, i) in platforms" :key="i" :value="platform" color="secondary" rounded="sm">
+              <div class="d-inline-flex align-center justify-space-between w-100">
+                <div>
+                  <h6 class="text-subtitle-1 text-medium-emphasis font-weight-bold">
+                    {{ platform.name }}
+                  </h6>
                 </div>
-              </v-list-item>
-            </v-list>
-          </perfect-scrollbar>
+
+                <div class="ml-auto text-subtitle-1 text-medium-emphasis font-weight-bold">{{ platform.count }} 条</div>
+              </div>
+            </v-list-item>
+          </v-list>
 
           <div class="text-center mt-3">
             <v-btn color="primary" variant="text"
@@ -137,26 +100,6 @@ export default {
   watch: {
     stat: {
       handler: function (val, oldVal) {
-        // 根据platform name汇总，累加
-        // let platform_map = {}
-        // for (let i = 0; i < val.platform.length; i++) {
-        //   const platform = val.platform[i];
-        //   if (platform_map[platform[1]]) {
-        //     platform_map[platform[1]] += platform[2]
-        //   } else {
-        //     platform_map[platform[1]] = platform[2]
-        //   }
-        // }
-        // this.platforms = []
-        // for (const key in platform_map) {
-        //   if (Object.hasOwnProperty.call(platform_map, key)) {
-        //     const count = platform_map[key];
-        //     this.platforms.push({
-        //       name: key,
-        //       count: count
-        //     })
-        //   }
-        // }
         this.platforms = val.platform
       },
       deep: true,

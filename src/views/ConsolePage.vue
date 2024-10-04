@@ -52,7 +52,7 @@ export default {
     createWebSocket() {
       this.status = '正在连接'
       
-      this.websocket = new WebSocket('ws://' +  window.location.hostname + ':6186');
+      this.websocket = new WebSocket('ws://' +  window.location.hostname + ':6185/api/live-log');
       this.status = '已连接'
       this.connection_status = '断开'
       this.websocket.onopen = () => {

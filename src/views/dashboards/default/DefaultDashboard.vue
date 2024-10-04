@@ -4,7 +4,7 @@
       <TotalMessage :stat="stat" />
     </v-col>
     <v-col cols="12" md="4">
-      <TotalSession :stat="stat" />
+      <OnlinePlatform :stat="stat" />
     </v-col>
     <v-col cols="12" md="4">
       <OnlineTime :stat="stat" />
@@ -21,7 +21,7 @@
 
 <script>
 import TotalMessage from './components/TotalMessage.vue';
-import TotalSession from './components/TotalSession.vue';
+import OnlinePlatform from './components/OnlinePlatform.vue';
 import OnlineTime from './components/OnlineTime.vue';
 import MessageStat from './components/MessageStat.vue';
 import PlatformStat from './components/PlatformStat.vue';
@@ -31,7 +31,7 @@ export default {
   name: 'DefaultDashboard',
   components: {
     TotalMessage,
-    TotalSession,
+    OnlinePlatform,
     OnlineTime,
     MessageStat,
     PlatformStat,
@@ -41,8 +41,7 @@ export default {
   }),
 
   mounted() {
-    axios.get('/api/stats').then((res) => {
-      console.log("stat", res.data.data);
+    axios.get('/api/stat/get').then((res) => {
       this.stat = res.data.data;
     });
   }

@@ -1,8 +1,4 @@
 <script setup>
-import ConfigGroupCard from '@/components/shared/ConfigGroupCard.vue';
-import ConfigGroupItem from '@/components/shared/ConfigGroupItem.vue';
-import ConfigDetailCard from '@/components/shared/ConfigDetailCard.vue';
-
 import axios from 'axios';
 import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
 
@@ -22,12 +18,12 @@ import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
           <h2>消息平台</h2>
 
           <v-tabs style="margin-top: 16px;" v-model="tabPlatform" align-tabs="left" color="deep-purple-accent-4">
-            <v-tab v-for="(item, index) in config_data.platform" :key="index" :value="index">
+            <v-tab v-for="(item, index) in config_data?.platform" :key="index" :value="index">
               {{ item.id }}({{ item.name }})
             </v-tab>
           </v-tabs>
           <v-tabs-window v-model="tabPlatform">
-            <v-tabs-window-item v-for="(platform, index) in config_data.platform" v-show="tabPlatform===index" :key="index" :value="index">
+            <v-tabs-window-item v-for="(platform, index) in config_data?.platform" v-show="tabPlatform===index" :key="index" :value="index">
               <v-container>
                 <AstrBotConfig :metadata="metadata" :iterable="platform" metadataKey="platform"></AstrBotConfig>
               </v-container>
@@ -36,7 +32,10 @@ import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
 
           <h2 style="margin-bottom: 16px; margin-top: 16px">通用配置</h2>
           <!-- platform_settings -->
-          <AstrBotConfig :metadata="metadata" :iterable="config_data.platform_settings" metadataKey="platform_settings"></AstrBotConfig>
+          <AstrBotConfig :metadata="metadata" :iterable="config_data?.platform_settings" metadataKey="platform_settings"></AstrBotConfig>
+          <AstrBotConfig :metadata="metadata?.platform_settings?.items" :iterable="config_data?.platform_settings?.rate_limit" metadataKey="rate_limit"></AstrBotConfig>
+          <AstrBotConfig :metadata="metadata?.content_safety?.items" :iterable="config_data?.content_safety?.baidu_aip" metadataKey="baidu_aip"></AstrBotConfig>
+          <AstrBotConfig :metadata="metadata?.content_safety?.items" :iterable="config_data?.content_safety?.internal_keywords" metadataKey="internal_keywords"></AstrBotConfig>
         </v-container>
       </v-tabs-window-item>
 
@@ -44,14 +43,16 @@ import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
         <v-container fluid>
           <h2>LLM</h2>
           <v-tabs v-model="tabLLM" align-tabs="left" color="deep-purple-accent-4">
-            <v-tab v-for="(item, index) in config_data.llm" :key="index" :value="index">
+            <v-tab v-for="(item, index) in config_data?.llm" :key="index" :value="index">
               {{ item.name }}
             </v-tab>
           </v-tabs>
           <v-tabs-window v-model="tabLLM">
-            <v-tabs-window-item v-for="(llm, index) in config_data.llm" v-show="tabLLM===index" :key="index" :value="index">
+            <v-tabs-window-item v-for="(llm, index) in config_data?.llm" v-show="tabLLM===index" :key="index" :value="index">
               <v-container>
                 <AstrBotConfig :metadata="metadata" :iterable="llm" metadataKey="llm"></AstrBotConfig>
+                <AstrBotConfig :metadata="metadata.llm.items" :iterable="llm.model_config" metadataKey="model_config"></AstrBotConfig>
+                <AstrBotConfig :metadata="metadata.llm.items" :iterable="llm.image_generation_model_config" metadataKey="image_generation_model_config"></AstrBotConfig>
               </v-container>
               
             </v-tabs-window-item>
@@ -60,7 +61,7 @@ import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
 
           <h2 style="margin-bottom: 16px;">通用配置</h2>
           <!-- llm_settings -->
-          <AstrBotConfig :metadata="metadata" :iterable="config_data.llm_settings" metadataKey="llm_settings"></AstrBotConfig>
+          <AstrBotConfig :metadata="metadata" :iterable="config_data?.llm_settings" metadataKey="llm_settings"></AstrBotConfig>
         </v-container>
       </v-tabs-window-item>
       <v-tabs-window-item v-if="tab === 2">
@@ -109,9 +110,6 @@ import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
 export default {
   name: 'ConfigPage',
   components: {
-    ConfigGroupCard,
-    ConfigGroupItem,
-    ConfigDetailCard,
     AstrBotConfig
   },
   data() {
@@ -121,6 +119,7 @@ export default {
           platform: [],
           llm: [],
           platform_settings: {},
+          content_safety: {},
           llm_settings: {},
         }
       },
@@ -142,7 +141,7 @@ export default {
   methods: {
     getConfig() {
       // 获取配置
-      axios.get('/api/configs').then((res) => {
+      axios.get('/api/config/get').then((res) => {
         this.config_data = res.data.data.config;
         this.metadata = res.data.data.metadata;
         for (let key in this.config_data) {
@@ -157,7 +156,7 @@ export default {
       });
     },
     updateConfig() {
-      axios.post('/api/astrbot-configs', this.config_data).then((res) => {
+      axios.post('/api/config/astrbot/update', this.config_data).then((res) => {
         if (res.data.status === "success") {
           this.save_message = res.data.message;
           this.save_message_snack = true;

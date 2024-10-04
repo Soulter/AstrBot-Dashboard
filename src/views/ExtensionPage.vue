@@ -158,7 +158,7 @@ export default {
       this.snack_success = success;
     },
     getExtensions() {
-      axios.get('/api/extensions').then((res) => {
+      axios.get('/api/plugin/get').then((res) => {
         this.extension_data.data = res.data.data;
         console.log(this.extension_data);
       });
@@ -178,7 +178,7 @@ export default {
       if (this.upload_file !== null) {
         const formData = new FormData();
         formData.append('file', this.upload_file[0]);
-        axios.post('/api/extensions/upload-install', formData, {
+        axios.post('/api/plugin/install-upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -200,7 +200,7 @@ export default {
         });
         return;
       } else {
-        axios.post('/api/extensions/install',
+        axios.post('/api/plugin/install',
           {
             url: this.extension_url
           }).then((res) => {
@@ -224,7 +224,7 @@ export default {
     },
     uninstallExtension(extension_name) {
       this.uninstall_loading = true;
-      axios.post('/api/extensions/uninstall',
+      axios.post('/api/plugin/uninstall',
       {
         name: extension_name
       }).then((res) => {
@@ -245,7 +245,7 @@ export default {
     },
     updateExtension(extension_name) {
       this.update_loading = true;
-      axios.post('/api/extensions/update',
+      axios.post('/api/plugin/update',
       {
         name: extension_name
       }).then((res) => {
@@ -267,7 +267,7 @@ export default {
     openExtensionConfig(extension_name) {
       this.curr_namespace = extension_name;
       this.configDialog = true;
-      axios.get('/api/configs?namespace='+extension_name).then((res) => {
+      axios.get('/api/config/get?namespace='+extension_name).then((res) => {
         this.extension_config = res.data.data;
         console.log(this.extension_config);
       }).catch((err) => {
@@ -275,7 +275,7 @@ export default {
       });
     },
     updateConfig() {
-      axios.post('/api/extension-configs', {
+      axios.post('/api/plugin/update', {
         "config": this.extension_config,
         "namespace": this.curr_namespace
       }).then((res) => {
