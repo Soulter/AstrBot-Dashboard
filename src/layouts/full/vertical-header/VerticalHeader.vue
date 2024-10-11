@@ -146,7 +146,7 @@ checkUpdate();
           </v-card-title>
           <v-card-text>
             <v-container>
-             <h3 class="mb-4">检查更新</h3>
+             <h3 class="mb-4">升级到最新版本</h3>
              <p>{{ updateStatus }}</p>
              <v-btn
               class="mt-4 mb-4"
@@ -158,13 +158,18 @@ checkUpdate();
             </v-btn>
             <v-divider></v-divider>
             <div style="margin-top: 16px;">
-              <h3 class="mb-4">切换到指定版本</h3>
+              <h3 class="mb-4">切换到指定版本或指定提交</h3>
               <v-text-field
-                label="版本号。如v3.1.3"
+                label="输入版本号或 master 分支下的 commit hash。"
                 v-model="version"
                 required
                 variant="outlined"
               ></v-text-field>
+              <div class="mb-4">
+                <small>如 v3.3.16 (不带 SHA) 或 42e5ec5d80b93b6bfe8b566754d45ffac4c3fe0b</small>
+                <br>
+                <a href="https://github.com/Soulter/AstrBot/commits/master"><small>查看 master 分支提交记录（点击右边的 copy 即可复制）</small></a>
+              </div>
               <v-btn
                 color="error" style="border-radius: 10px;"
                 @click="switchVersion(version)">

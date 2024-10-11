@@ -11,11 +11,11 @@ const open = (link: string | undefined) => {
 
 <template>
   <v-card variant="outlined" elevation="0" class="withbg">
-    <v-card-item style="padding: 10px 20px">
+    <v-card-item style="padding: 10px 14px">
       <div class="d-sm-flex align-center justify-space-between">
-        <v-card-title>{{ props.title }}</v-card-title>
+        <v-card-title style="font-size: 17px;">{{ props.title }}</v-card-title>
         <v-spacer></v-spacer>
-        <v-btn icon="mdi-link" variant="plain" @click="open(props.link)"></v-btn>
+        <v-btn variant="plain" @click="open(props.link)">仓库</v-btn>
       </div>
     </v-card-item>
     <v-divider></v-divider>

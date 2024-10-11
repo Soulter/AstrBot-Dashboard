@@ -14,22 +14,34 @@ import axios from 'axios';
       </div>
     </v-col>
     <v-col cols="12" md="6" lg="4" v-for="extension in extension_data.data" >
-      <ExtensionCard :key="extension.name" :title="extension.name" :link="extension.repo" style="margin-bottom: 16px;">
-        <p style="min-height: 180px; max-height: 180px; overflow: hidden;">{{ extension.desc }}</p>
+      <ExtensionCard :key="extension.name" :title="extension.name" :link="extension.repo" style="margin-bottom: 4px;">
+        <p style="min-height: 150px; max-height: 150px; overflow: hidden;">{{ extension.desc }}</p>
         <div class="d-flex align-center gap-2">
           <v-icon>mdi-account</v-icon>
           <span>{{ extension.author }}</span>
           <v-spacer></v-spacer>
-          <v-btn variant="plain" @click="openExtensionConfig(extension.name)" v-bind="props">配置</v-btn>
-          <v-btn variant="plain" @click="updateExtension(extension.name)" :loading="update_loading">更新</v-btn>
-          <v-btn variant="plain" @click="uninstallExtension(extension.name)" :loading="uninstall_loading">卸载</v-btn>
+          <v-btn variant="plain" @click="openExtensionConfig(extension.name)">配置</v-btn>
+          <v-btn variant="plain" @click="updateExtension(extension.name)" :loading="loading_">更新</v-btn>
+          <v-btn variant="plain" @click="uninstallExtension(extension.name)" :loading="loading_">卸载</v-btn>
         </div>
       </ExtensionCard>
     </v-col>
     <v-col cols="12" md="12">
       <div style="background-color: white; width: 100%; padding: 16px; border-radius: 10px;">
-        <h3>🧩 插件市场 [待开发]</h3>
+        <h3>🧩 插件市场</h3>
       </div>
+    </v-col>
+    <v-col cols="12" md="6" lg="4" v-for="plugin in pluginMarketData" >
+      <ExtensionCard :key="plugin.name" :title="plugin.name" :link="plugin.repo" style="margin-bottom: 4px;">
+        <p style="min-height: 150px; max-height: 150px; overflow: hidden;">{{ plugin.desc }}</p>
+        <div class="d-flex align-center gap-2">
+          <v-icon>mdi-account</v-icon>
+          <span>{{ plugin.author }}</span>
+          <v-spacer></v-spacer>
+          <v-btn :loading="loading_" v-if="!plugin.installed" variant="plain" @click="extension_url=plugin.repo; newExtension()">安装</v-btn>
+          <v-btn v-else variant="plain" disabled>已安装</v-btn>
+        </div>
+      </ExtensionCard>
     </v-col>
 
   </v-row>
@@ -105,7 +117,7 @@ import axios from 'axios';
         <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
           关闭
         </v-btn>
-        <v-btn color="blue-darken-1" variant="text" :loading="install_loading" @click="newExtension(extension_url)">
+        <v-btn color="blue-darken-1" variant="text" :loading="loading_" @click="newExtension()">
           安装
         </v-btn>
       </v-card-actions>
@@ -141,15 +153,16 @@ export default {
       snack_message: "",
       snack_show: false,
       snack_success: "success",
-      install_loading: false,
-      uninstall_loading: false,
+      loading_: false,
       configDialog: false,
       extension_config: {},
-      upload_file: null
+      upload_file: null,
+      pluginMarketData: {},
     }
   },
   mounted() {
     this.getExtensions();
+    this.fetchPluginCollection();
   },
   methods: {
     toast(message, success) {
@@ -160,7 +173,7 @@ export default {
     getExtensions() {
       axios.get('/api/plugin/get').then((res) => {
         this.extension_data.data = res.data.data;
-        console.log(this.extension_data);
+        this.checkAlreadyInstalled();
       });
     },
     newExtension() {
@@ -174,7 +187,7 @@ export default {
         return;
       }
 
-      this.install_loading = true;
+      this.loading_ = true;
       if (this.upload_file !== null) {
         const formData = new FormData();
         formData.append('file', this.upload_file[0]);
@@ -183,7 +196,7 @@ export default {
             'Content-Type': 'multipart/form-data'
           }
         }).then((res) => {
-          this.install_loading = false;
+          this.loading_ = false;
           if (res.data.status === "error") {
             this.toast(res.data.message, "error");
             return;
@@ -195,7 +208,7 @@ export default {
           this.dialog = false;
           this.getExtensions();
         }).catch((err) => {
-          this.install_loading = false;
+          this.loading_ = false;
           this.toast(err, "error");
         });
         return;
@@ -204,7 +217,7 @@ export default {
           {
             url: this.extension_url
           }).then((res) => {
-            this.install_loading = false;
+            this.loading_ = false;
             if (res.data.status === "error") {
               this.toast(res.data.message, "error");
               return;
@@ -216,19 +229,19 @@ export default {
             this.dialog = false;
             this.getExtensions();
           }).catch((err) => {
-            this.install_loading = false;
+            this.loading_ = false;
             this.toast(err, "error");
           });
 
       }
     },
     uninstallExtension(extension_name) {
-      this.uninstall_loading = true;
+      this.loading_ = true;
       axios.post('/api/plugin/uninstall',
       {
         name: extension_name
       }).then((res) => {
-        this.uninstall_loading = false;
+        this.loading_ = false;
         if (res.data.status === "error") {
           this.toast(res.data.message, "error");
           return;
@@ -239,17 +252,17 @@ export default {
         this.dialog = false;
         this.getExtensions();
       }).catch((err) => {
-        this.uninstall_loading = false;
+        this.loading_ = false;
         this.toast(err, "error");
       });
     },
     updateExtension(extension_name) {
-      this.update_loading = true;
+      this.loading_ = true;
       axios.post('/api/plugin/update',
       {
         name: extension_name
       }).then((res) => {
-        this.update_loading = false;
+        this.loading_ = false;
         if (res.data.status === "error") {
           this.toast(res.data.message, "error");
           return;
@@ -260,7 +273,7 @@ export default {
         this.dialog = false;
         this.getExtensions();
       }).catch((err) => {
-        this.update_loading = false;
+        this.loading_ = false;
         this.toast(err, "error");
       });
     },
@@ -275,11 +288,11 @@ export default {
       });
     },
     updateConfig() {
-      axios.post('/api/plugin/update', {
+      axios.post('/api/config/plugin/update', {
         "config": this.extension_config,
         "namespace": this.curr_namespace
       }).then((res) => {
-        if (res.data.status === "success") {
+        if (res.data.status === "ok") {
           this.toast(res.data.message, "success");
         } else {
           this.toast(res.data.message, "error");
@@ -287,6 +300,36 @@ export default {
       }).catch((err) => {
         this.toast(err, "error");
       });
+    },
+    fetchPluginCollection() {
+      let url = "https://soulter.github.io/AstrBot_Plugins_Collection/plugins.json"
+      axios.get(url).then((res) => {
+        let data = []
+        this.pluginMarketDataOrigin = res.data;
+        for (let key in res.data) {
+          data.push({
+            "name": key,
+            "desc": res.data[key].desc,
+            "author": res.data[key].author,
+            "repo": res.data[key].repo,
+            "installed": false
+          })
+        }
+        this.pluginMarketData = data;
+        this.checkAlreadyInstalled();
+      }).catch((err) => {
+        this.toast("获取插件市场数据失败: " + err, "error");
+      });
+    },
+    checkAlreadyInstalled() {
+      // 可优化
+      for (let i = 0; i < this.pluginMarketData.length; i++) {
+        for (let j = 0; j < this.extension_data.data.length; j++) {
+          if (this.pluginMarketData[i].repo === this.extension_data.data[j].repo) {
+            this.pluginMarketData[i].installed = true;
+          }
+        }
+      }
     }
   },
 }
