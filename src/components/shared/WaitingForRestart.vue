@@ -32,7 +32,6 @@ export default {
             newStartTime: -1,
             status: '',
             cnt: 0,
-            intervalId: null // 用于保存 interval ID
         }
     },
     methods: {
@@ -43,30 +42,35 @@ export default {
             this.status = ""
             console.log('start wfr')
             await this.getStartTime()
-            this.intervalId = setInterval(() => {
-                if (this.newStartTime === -1 && this.cnt < 10 && this.visible) {
-                    this.checkStartTime()
-                    this.cnt++
-                } else {
-                    if (this.cnt == 10) {
-                        this.status = '拉取状态达到最大次数，请手动检查。'
-                    }
-                    this.cnt = 0
-                    setTimeout(() => {
-                        this.visible = false
-                    }, 1000)
-                    clearInterval(this.intervalId) // 清除 interval
-                    return
-                }
+            setTimeout(() => {
+                this.timeoutInternal()
             }, 1000)
         },
+        timeoutInternal() {
+            console.log('wfr: timeoutInternal', this.newStartTime, this.startTime)
+            if (this.newStartTime === -1 && this.cnt < 10 && this.visible) {
+                this.checkStartTime()
+                this.cnt++
+                setTimeout(() => {
+                    this.timeoutInternal()
+                }, 1000)
+            } else {
+                if (this.cnt == 10) {
+                    this.status = '拉取状态达到最大次数，请手动检查。'
+                }
+                this.cnt = 0
+                setTimeout(() => {
+                    this.visible = false
+                }, 1000)
+            }
+        },
         async getStartTime() {
-            axios.get('/api/stat/start-time').then((res) => {
+            axios.get('/api/stat/start-time', { timeout: 3000 }).then((res) => {
                 this.startTime = res.data.data.start_time
             })
         },
         async checkStartTime() {
-            let res = await axios.get('/api/stat/start-time')
+            let res = await axios.get('/api/stat/start-time', { timeout: 3000 })
             this.newStartTime = res.data.data.start_time
             console.log('wfr: checkStartTime', this.newStartTime, this.startTime)
             if (this.newStartTime !== this.startTime) {
@@ -77,6 +81,7 @@ export default {
                     window.location.reload()
                 }, 2000)
             }
+            return this.newStartTime
         }
     }
 }
