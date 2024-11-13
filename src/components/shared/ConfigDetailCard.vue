@@ -9,7 +9,6 @@ const props = defineProps({
 <template>
   <a v-show="config.length === 0">该插件没有配置</a>
   <UiParentCard v-for="group in config" :key="group.name" :title="group.name" style="margin-bottom: 16px;">
-    <!-- 对group内的数组进行解析。如果val_type是bool，则用vuetify的单选；以此类推-->
     <template v-for="item in group.body">
       <template v-if="item.config_type === 'item'">
         <template v-if="item.val_type === 'bool'">

@@ -23,7 +23,7 @@ const sidebarItem: menu[] = [
   {
     title: '配置',
     icon: 'mdi-cog',
-    to: '/config'
+    to: '/config',
   },
   {
     title: '插件',
@@ -34,6 +34,11 @@ const sidebarItem: menu[] = [
     title: '控制台',
     icon: 'mdi-console',
     to: '/console'
+  },
+  {
+    title: '模型微调',
+    icon: 'mdi-grain',
+    to: '/fine-tune'
   },
 ];
 

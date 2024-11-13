@@ -12,7 +12,7 @@ import 'xterm/css/xterm.css'
     </v-btn>
   </div>
   <div style="width: 100%; height: 100%; background-color: #fff; padding: 16px; border-radius: 10px;">
-    <div id="terminal" style=""></div>
+    <div id="terminal" style="height: 100%"></div>
   </div>
 
 </template>
@@ -34,8 +34,8 @@ export default {
   mounted() {
     this.term = new Terminal({
         rendererType: "canvas", //渲染类型
-        rows: 28,
-        cols: 100,
+        rows: 35,
+        cols: 150,
         theme: {
           foreground: "#000", //字体
           background: "#ffffff", //背景色

@@ -31,6 +31,11 @@ const MainRoutes = {
       name: 'Console',
       path: '/console',
       component: () => import('@/views/ConsolePage.vue')
+    },
+    {
+      name: 'FineTune',
+      path: '/fine-tune',
+      component: () => import('@/views/FineTunePage.vue')
     }
   ]
 };

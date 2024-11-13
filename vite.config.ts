@@ -39,7 +39,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://jp1.soulter.top:6185/',
+        target: 'http://localhost:6185/',
         changeOrigin: true,
       }
     }
