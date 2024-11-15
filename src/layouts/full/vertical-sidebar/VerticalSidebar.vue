@@ -26,7 +26,9 @@ const sidebarMenu = shallowRef(sidebarItems);
           🤔 初次使用？点击查看文档！
         </v-btn>
       </v-list-item>
-      <small>© 2024 AstrBot</small>
+      <small style="display: block;" v-if="buildVer">构建: {{ buildVer }}</small>
+      <small style="display: block;" v-else="buildVer">构建: embedded</small>
+      <small style="display: block; margin-top: 8px;">© 2024 AstrBot</small>
     </div>
 
   </v-navigation-drawer>
@@ -40,10 +42,20 @@ export default {
     NavItem,
   },
   data: () => ({
-    version: "-",
+    version: "",
+    buildVer: ""
   }),
   mounted() {
     this.get_version()
+    fetch('/assets/version').then((res) => {
+      return res.text()
+    }).then((res) => {
+      if (res.length > 10) {
+        // 不是版本，不显示 😎
+        return
+      }
+      this.buildVer = res
+    })
   },
   methods: {
     get_version() {

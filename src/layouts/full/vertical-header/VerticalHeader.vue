@@ -113,10 +113,6 @@ commonStore.createWebSocket();
       <small v-if="hasNewVersion">
         有新版本！
       </small>
-
-      <small v-else>
-        当前版本已是最新
-      </small>
     </div>
 
 
