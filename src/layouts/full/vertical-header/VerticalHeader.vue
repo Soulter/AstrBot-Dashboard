@@ -4,12 +4,9 @@ import { useCustomizerStore } from '../../../stores/customizer';
 import axios from 'axios';
 import { md5 } from 'js-md5';
 import { useAuthStore } from '@/stores/auth';
+import { useCommonStore } from '@/stores/common';
 
 const customizer = useCustomizerStore();
-const showSearch = ref(false);
-function searchbox() {
-  showSearch.value = !showSearch.value;
-}
 let dialog = ref(false);
 let updateStatusDialog = ref(false);
 let password = ref('');
@@ -91,6 +88,8 @@ function switchVersion(version: string) {
 
 checkUpdate();
 
+const commonStore = useCommonStore();
+commonStore.createWebSocket();
 </script>
 
 <template>

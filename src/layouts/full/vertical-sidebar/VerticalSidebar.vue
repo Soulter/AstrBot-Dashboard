@@ -19,6 +19,16 @@ const sidebarMenu = shallowRef(sidebarItems);
     <div class="text-center">
       <v-chip color="inputBorder" size="small"> v{{ version }} </v-chip>
     </div>
+
+    <div style="position: absolute; bottom: 32px; width: 100%" class="text-center">
+      <v-list-item v-if="!customizer.mini_sidebar" href="https://astrbot.soulter.top/">
+        <v-btn variant="plain" size="small">
+          🤔 初次使用？点击查看文档！
+        </v-btn>
+      </v-list-item>
+      <small>© 2024 AstrBot</small>
+    </div>
+
   </v-navigation-drawer>
 </template>
 

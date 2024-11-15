@@ -2,15 +2,14 @@
 import ExtensionCard from '@/components/shared/ExtensionCard.vue';
 import ConfigDetailCard from '@/components/shared/ConfigDetailCard.vue';
 import WaitingForRestart from '@/components/shared/WaitingForRestart.vue';
+import ConsoleDisplayer from '@/components/shared/ConsoleDisplayer.vue';
 import axios from 'axios';
 
 </script>
 
 <template>
   <v-row>
-    <v-alert
-      style="margin: 16px"
-      text="1. 如果因为网络问题安装失败，可以前往 配置->其他配置->插件仓库镜像 修改安装镜像源。2. 如需插件帮助请点击 `仓库` 查看 README"
+    <v-alert style="margin: 16px" text="1. 如果因为网络问题安装失败，可以前往 配置->其他配置->插件仓库镜像 修改安装镜像源。2. 如需插件帮助请点击 `仓库` 查看 README"
       title="💡小提示" type="info" variant="tonal">
     </v-alert>
     <v-col cols="12" md="12">
@@ -119,7 +118,7 @@ import axios from 'axios';
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="loadingDialog.show" width="500" persistent>
+  <v-dialog v-model="loadingDialog.show" width="700" persistent>
     <v-card>
       <v-card-title>
         <span class="text-h5">{{ loadingDialog.title }}</span>
@@ -139,11 +138,16 @@ import axios from 'axios';
               v-if="loadingDialog.statusCode === 2"></v-icon>
             <div class="text-h4 font-weight-bold">{{ loadingDialog.result }}</div>
           </div>
+          <div style="margin-top: 32px;">
+            <h3>日志</h3>
+            <ConsoleDisplayer historyNum="10" style="height: 200px; margin-top: 16px;"></ConsoleDisplayer>
+          </div>
+
         </v-container>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="blue-darken-1" variant="text" @click="loadingDialog.show = false">
+        <v-btn color="blue-darken-1" variant="text" @click="resetLoadingDialog()">
           关闭
         </v-btn>
       </v-card-actions>
@@ -164,7 +168,8 @@ export default {
   components: {
     ExtensionCard,
     ConfigDetailCard,
-    WaitingForRestart
+    WaitingForRestart,
+    ConsoleDisplayer
   },
   data() {
     return {
@@ -186,7 +191,6 @@ export default {
         show: false,
         title: "加载中...",
         statusCode: 0, // 0: loading, 1: success, 2: error,
-        statusMessage: "",
         result: ""
       }
     }
@@ -201,17 +205,22 @@ export default {
       this.snack_show = true;
       this.snack_success = success;
     },
+    resetLoadingDialog() {
+      this.loadingDialog = {
+        show: false,
+        title: "加载中...",
+        statusCode: 0,
+        result: ""
+      }
+    },
     onLoadingDialogResult(statusCode, result, timeToClose = 2000) {
       this.loadingDialog.statusCode = statusCode;
       this.loadingDialog.result = result;
+      if (timeToClose === -1) {
+        return
+      }
       setTimeout(() => {
-        this.loadingDialog = {
-          show: false,
-          title: "加载中...",
-          statusCode: 0, // 0: loading, 1: success, 2: error,
-          statusMessage: "",
-          result: ""
-        }
+        this.resetLoadingDialog()
       }, timeToClose);
     },
     getExtensions() {
@@ -243,7 +252,7 @@ export default {
         }).then((res) => {
           this.loading_ = false;
           if (res.data.status === "error") {
-            this.onLoadingDialogResult(2, res.data.message);
+            this.onLoadingDialogResult(2, res.data.message, -1);
             return;
           }
           this.extension_data.data = res.data.data;
@@ -253,7 +262,7 @@ export default {
           this.$refs.wfr.check();
         }).catch((err) => {
           this.loading_ = false;
-          this.onLoadingDialogResult(2, err);
+          this.onLoadingDialogResult(2, err, -1);
         });
         return;
       } else {
@@ -264,7 +273,7 @@ export default {
           }).then((res) => {
             this.loading_ = false;
             if (res.data.status === "error") {
-              this.onLoadingDialogResult(2, res.data.message);
+              this.onLoadingDialogResult(2, res.data.message, -1);
               return;
             }
             this.extension_data.data = res.data.data;
@@ -275,7 +284,7 @@ export default {
             this.$refs.wfr.check();
           }).catch((err) => {
             this.loading_ = false;
-            this.onLoadingDialogResult(2, err);
+            this.onLoadingDialogResult(2, err, -1);
           });
 
       }
@@ -305,7 +314,7 @@ export default {
           name: extension_name
         }).then((res) => {
           if (res.data.status === "error") {
-            this.onLoadingDialogResult(2, res.data.message);
+            this.onLoadingDialogResult(2, res.data.message, -1);
             return;
           }
           this.extension_data.data = res.data.data;

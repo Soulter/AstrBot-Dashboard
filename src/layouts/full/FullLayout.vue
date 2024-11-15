@@ -15,8 +15,8 @@ const customizer = useCustomizerStore();
       <VerticalHeaderVue />
       <VerticalSidebarVue />
       <v-main>
-        <v-container fluid class="page-wrapper">
-          <div>
+        <v-container fluid class="page-wrapper" style="height: calc(100% - 8px)">
+          <div style="height: 100%;">
             <RouterView />
           </div>
         </v-container>

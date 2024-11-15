@@ -9,10 +9,10 @@
                         <v-icon class="mb-6" color="success" icon="mdi-check-circle-outline" size="128"></v-icon>
                         <p>重启成功！</p>
                     </div>
-                    <p v-if="startTime != -1">当前实例标识：{{ startTime }}</p>
-                    <p v-if="newStartTime != -1">检查到新实例：{{ newStartTime }}，即将自动刷新页面</p>
-                    <p v-if="status">{{ status }}</p>
-                    <p>次数：{{ cnt }}</p>
+                    <small v-if="startTime != -1" style="display: block;">当前实例标识：{{ startTime }}</small>
+                    <small v-if="newStartTime != -1" style="display: block;">检查到新实例：{{ newStartTime }}，即将自动刷新页面</small>
+                    <small v-if="status" style="display: block;">{{ status }}</small>
+                    <small style="display: block;">次数：{{ cnt }} / 15</small>
                 </div>
 
             </v-card-text>
@@ -48,7 +48,7 @@ export default {
         },
         timeoutInternal() {
             console.log('wfr: timeoutInternal', this.newStartTime, this.startTime)
-            if (this.newStartTime === -1 && this.cnt < 10 && this.visible) {
+            if (this.newStartTime === -1 && this.cnt < 15 && this.visible) {
                 this.checkStartTime()
                 this.cnt++
                 setTimeout(() => {

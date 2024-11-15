@@ -16,7 +16,6 @@ interface User {
   name: string;
 }
 
-// Assuming you have a type/interface for your authentication store
 interface AuthStore {
   user: User | null;
   returnUrl: string | null;
@@ -25,7 +24,6 @@ interface AuthStore {
 }
 
 router.beforeEach(async (to, from, next) => {
-  // redirect to login page if not logged in and trying to access a restricted page
   const publicPages = ['/auth/login'];
   const authRequired = !publicPages.includes(to.path);
   const auth: AuthStore = useAuthStore();
