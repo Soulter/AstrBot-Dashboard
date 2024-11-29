@@ -8,11 +8,24 @@ name: Create Release
 
 jobs:
   build:
-    name: Create Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: npm install, build
+        run: |
+          npm install
+          npm run build
+
+      - name: Inject Commit SHA
+        id: get_sha
+        run: |
+          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          mkdir -p dist/assets
+          echo $COMMIT_SHA > dist/assets/version
+          zip -r dist.zip dist
+          
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -25,3 +38,5 @@ jobs:
             自动发版。
           draft: false
           prerelease: false
+          files: |
+            dist.zip
