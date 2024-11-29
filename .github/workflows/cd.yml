@@ -30,5 +30,6 @@ jobs:
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          bodyFile: "dist.zip"
+          body: "自动发布"
+          artifacts: "dist.zip"
           token: ${{ secrets.GITHUB_TOKEN }}
