@@ -71,9 +71,10 @@ export default {
         },
         async checkStartTime() {
             let res = await axios.get('/api/stat/start-time', { timeout: 3000 })
-            this.newStartTime = res.data.data.start_time
+            let newStartTime = res.data.data.start_time
             console.log('wfr: checkStartTime', this.newStartTime, this.startTime)
             if (this.newStartTime !== this.startTime) {
+                this.newStartTime = newStartTime
                 console.log('wfr: restarted')
                 setTimeout(() => {
                     this.visible = false

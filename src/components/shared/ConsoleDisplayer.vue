@@ -57,7 +57,7 @@ export default {
     printLog(log) {
       // append 一个 span 标签到 term，block 的方式
       let ele = document.getElementById('term')
-      let span = document.createElement('span')
+      let span = document.createElement('pre')
       let style = this.logColorAnsiMap['default']
       for (let key in this.logColorAnsiMap) {
         if (log.startsWith(key)) {

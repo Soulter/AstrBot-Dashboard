@@ -81,10 +81,27 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                 <h3>大语言模型提供商</h3>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
+                <v-alert style="margin: 8px" text="提供商支持多实例部署，点击加号即可添加新的实例。使用 `/provider` 指令可切换提供商实例。如果想要删除，请切换至代码模式手动删除（慎重）。" title="💡小提示"
+                  type="info" variant="tonal">
+                </v-alert>
                 <v-tabs v-model="tabLLM" align-tabs="left" color="deep-purple-accent-4">
                   <v-tab v-for="(item, index) in config_data?.llm" :key="index" :value="index">
-                    {{ item.name }}
+                    {{ item.id }}({{ item.name }})
                   </v-tab>
+                  <!-- 添加按钮 -->
+                  <v-menu>
+                    <template v-slot:activator="{ props }">
+                      <v-btn variant="plain" size="large" v-bind="props">
+                        <v-icon>mdi-plus</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list @update:selected="addProvider($event)">
+                      <v-list-item v-for="(item, index) in provider_config_tmpl" :key="index" :value="index">
+                        <v-list-item-title>{{ index }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
+
                 </v-tabs>
                 <v-tabs-window v-model="tabLLM">
                   <v-tabs-window-item v-for="(llm, index) in config_data?.llm" v-show="tabLLM === index" :key="index"
@@ -143,8 +160,7 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                       </template>
                     </v-combobox>
                   </div>
-                  <div
-                    v-if="metadata[key]?.hint && metadata[key]?.type !== 'object'">
+                  <div v-if="metadata[key]?.hint && metadata[key]?.type !== 'object'">
                     <v-btn icon size="x-small" style="margin-bottom: 22px;">
                       <v-icon size="x-small">mdi-help</v-icon>
                       <v-tooltip activator="parent" location="start">{{ metadata[key]?.hint
@@ -217,6 +233,7 @@ export default {
       },
       fetched: false,
       metadata: {},
+      provider_config_tmpl: {},
       save_message_snack: false,
       save_message: "",
       save_message_success: "",
@@ -239,6 +256,7 @@ export default {
         this.config_data = res.data.data.config;
         this.fetched = true
         this.metadata = res.data.data.metadata;
+        this.provider_config_tmpl = res.data.data.provider_config_tmpl;
         for (let key in this.config_data) {
           if (key != "platform" && key != "llm" && key != "platform_settings" && key != "llm_settings" && key != "content_safety") {
             this.common_configs_key.push(key);
@@ -285,6 +303,17 @@ export default {
         this.save_message = "配置未应用，Json 格式错误。";
         this.save_message_snack = true;
       }
+    },
+    addProvider(val) {
+      console.log(val);
+      let provider = JSON.parse(JSON.stringify(this.provider_config_tmpl[val]));
+      provider.id = "new_" + val + this.config_data.llm.length;
+      this.config_data.llm.push(provider);
+      this.tabLLM = this.config_data.llm.length - 1;
+    },
+    deleteProvider() {
+      this.config_data.llm.splice(this.tabLLM, 1);
+      this.tabLLM = 0;
     }
   },
 }
