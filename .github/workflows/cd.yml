@@ -24,8 +24,7 @@ jobs:
         id: get_sha
         run: |
           echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
-          mkdir -p dist/assets
-          echo $COMMIT_SHA > dist/assets/version
+          echo ${{ github.ref }} > dist/assets/version
           zip -r dist.zip dist
       - name: Create Release
         uses: ncipollo/release-action@v1

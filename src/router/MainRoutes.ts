@@ -33,9 +33,9 @@ const MainRoutes = {
       component: () => import('@/views/ConsolePage.vue')
     },
     {
-      name: 'FineTune',
-      path: '/fine-tune',
-      component: () => import('@/views/FineTunePage.vue')
+      name: 'Project ATRI',
+      path: '/project-atri',
+      component: () => import('@/views/ATRIProject.vue')
     }
   ]
 };

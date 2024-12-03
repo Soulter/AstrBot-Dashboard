@@ -12,7 +12,7 @@
                     <small v-if="startTime != -1" style="display: block;">当前实例标识：{{ startTime }}</small>
                     <small v-if="newStartTime != -1" style="display: block;">检查到新实例：{{ newStartTime }}，即将自动刷新页面</small>
                     <small v-if="status" style="display: block;">{{ status }}</small>
-                    <small style="display: block;">次数：{{ cnt }} / 15</small>
+                    <small style="display: block;">尝试次数：{{ cnt }} / 60</small>
                 </div>
 
             </v-card-text>
@@ -48,7 +48,7 @@ export default {
         },
         timeoutInternal() {
             console.log('wfr: timeoutInternal', this.newStartTime, this.startTime)
-            if (this.newStartTime === -1 && this.cnt < 15 && this.visible) {
+            if (this.newStartTime === -1 && this.cnt < 60 && this.visible) {
                 this.checkStartTime()
                 this.cnt++
                 setTimeout(() => {

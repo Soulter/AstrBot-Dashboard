@@ -36,9 +36,9 @@ const sidebarItem: menu[] = [
     to: '/console'
   },
   {
-    title: '模型微调',
+    title: 'Project ATRI',
     icon: 'mdi-grain',
-    to: '/fine-tune'
+    to: '/project-atri'
   },
 ];
 
