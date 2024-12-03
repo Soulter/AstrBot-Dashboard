@@ -12,11 +12,14 @@ const username = ref('');
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function validate(values: any, { setErrors }: any) {
   // md5加密
-  if (password.value != '')
+  let password_ = password.value;
+  if (password.value != '') {
     // @ts-ignore
-    password.value = md5(password.value);
+    password_ = md5(password.value);
+  }
+
   const authStore = useAuthStore();
-  return authStore.login(username.value, password.value).then((res) => {
+  return authStore.login(username.value, password_).then((res) => {
     console.log(res);
   }).catch((err) => {
     setErrors({ apiError: err });
@@ -33,7 +36,7 @@ async function validate(values: any, { setErrors }: any) {
       color="primary" hide-details="auto" :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
       :type="show1 ? 'text' : 'password'" @click:append="show1 = !show1" class="pwdInput"></v-text-field>
 
-    <small>默认用户名和密码为空。</small>
+    <small>默认用户名和密码为 astrbot。</small>
     <v-btn color="secondary" :loading="isSubmitting" block class="mt-8" variant="flat" size="large" :disabled="valid"
       type="submit">
       登录</v-btn>

@@ -11,16 +11,12 @@ export const router = createRouter({
   ]
 });
 
-interface User {
-  id: number;
-  name: string;
-}
-
 interface AuthStore {
-  user: User | null;
+  username: string;
   returnUrl: string | null;
   login(username: string, password: string): Promise<void>;
   logout(): void;
+  has_token(): boolean;
 }
 
 router.beforeEach(async (to, from, next) => {
@@ -29,7 +25,7 @@ router.beforeEach(async (to, from, next) => {
   const auth: AuthStore = useAuthStore();
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (authRequired && !auth.user) {
+    if (authRequired && !auth.has_token()) {
       auth.returnUrl = to.fullPath;
       return next('/auth/login');
     } else next();

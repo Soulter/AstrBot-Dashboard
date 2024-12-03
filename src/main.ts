@@ -8,6 +8,7 @@ import VueApexCharts from 'vue3-apexcharts';
 
 import print from 'vue3-print-nb';
 import { loader } from '@guolao/vue-monaco-editor'
+import axios from 'axios';
 
 const app = createApp(App);
 app.use(router);
@@ -16,6 +17,13 @@ app.use(print);
 app.use(VueApexCharts);
 app.use(vuetify).mount('#app');
 
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
 
 loader.config({
   paths: {

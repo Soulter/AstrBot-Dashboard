@@ -11,6 +11,7 @@ let dialog = ref(false);
 let updateStatusDialog = ref(false);
 let password = ref('');
 let newPassword = ref('');
+let newUsername = ref('');
 let status = ref('');
 let updateStatus = ref('')
 let hasNewVersion = ref(false);
@@ -20,17 +21,18 @@ const open = (link: string) => {
   window.open(link, '_blank');
 };
 
-// 密码修改
-function passwordChange() {
+// 账户修改
+function accountEdit() {
   // md5加密
   // @ts-ignore
   if (password.value != '') {
     password.value = md5(password.value);
   }
   newPassword.value = md5(newPassword.value);
-  axios.post('/api/auth/password/reset', {
+  axios.post('/api/auth/account/edit', {
     password: password.value,
-    new_password: newPassword.value
+    new_password: newPassword.value,
+    new_username: newUsername.value
   })
     .then((res) => {
       if (res.data.status == 'error') {
@@ -165,12 +167,12 @@ commonStore.createWebSocket();
     <v-dialog v-model="dialog" persistent width="700">
       <template v-slot:activator="{ props }">
         <v-btn class="text-primary mr-4" color="lightprimary" variant="flat" rounded="sm" v-bind="props">
-          密码修改 📰
+          账户 📰
         </v-btn>
       </template>
       <v-card>
         <v-card-title>
-          <span class="text-h5">密码修改</span>
+          <span class="text-h5">账户</span>
         </v-card-title>
         <v-card-text>
           <v-container>
@@ -179,12 +181,15 @@ commonStore.createWebSocket();
                 <v-text-field label="原密码*" type="password" v-model="password" required
                   variant="outlined"></v-text-field>
 
-                <v-text-field label="新密码*" type="password" v-model="newPassword" required
+                <v-text-field label="新用户名" type="password" v-model="newUsername" required
+                  variant="outlined"></v-text-field>
+
+                <v-text-field label="新密码" type="password" v-model="newPassword" required
                   variant="outlined"></v-text-field>
               </v-col>
             </v-row>
           </v-container>
-          <small>如果是第一次修改密码，原密码请留空。</small>
+          <small>默认用户名和密码是 astrbot。</small>
           <br>
           <small>{{ status }}</small>
         </v-card-text>
@@ -193,7 +198,7 @@ commonStore.createWebSocket();
           <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
             关闭
           </v-btn>
-          <v-btn color="blue-darken-1" variant="text" @click="passwordChange">
+          <v-btn color="blue-darken-1" variant="text" @click="accountEdit">
             提交
           </v-btn>
         </v-card-actions>
