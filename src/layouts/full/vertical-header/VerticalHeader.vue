@@ -66,6 +66,12 @@ function checkUpdate() {
       updateStatus.value = res.data.message;
     })
     .catch((err) => {
+      if (err.response.status == 401) {
+        console.log("401");
+        const authStore = useAuthStore();
+        authStore.logout();
+        return;
+      }
       console.log(err);
       updateStatus.value = err
     });
