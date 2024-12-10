@@ -23,6 +23,9 @@
 <script>
 import axios from 'axios'
 
+import { useCommonStore } from '@/stores/common';
+
+
 export default {
     name: 'WaitingForRestart',
     data() {
@@ -37,11 +40,10 @@ export default {
     methods: {
         async check() {
             this.newStartTime = -1
-            this.startTime = -1
+            this.startTime = useCommonStore().getStartTime()
             this.visible = true
             this.status = ""
             console.log('start wfr')
-            await this.getStartTime()
             setTimeout(() => {
                 this.timeoutInternal()
             }, 1000)
@@ -63,11 +65,6 @@ export default {
                     this.visible = false
                 }, 1000)
             }
-        },
-        async getStartTime() {
-            axios.get('/api/stat/start-time', { timeout: 3000 }).then((res) => {
-                this.startTime = res.data.data.start_time
-            })
         },
         async checkStartTime() {
             let res = await axios.get('/api/stat/start-time', { timeout: 3000 })

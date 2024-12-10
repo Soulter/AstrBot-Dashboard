@@ -28,7 +28,9 @@ function accountEdit() {
   if (password.value != '') {
     password.value = md5(password.value);
   }
-  newPassword.value = md5(newPassword.value);
+  if (newPassword.value != '') {
+    newPassword.value = md5(newPassword.value);
+  }
   axios.post('/api/auth/account/edit', {
     password: password.value,
     new_password: newPassword.value,
@@ -92,6 +94,7 @@ checkUpdate();
 
 const commonStore = useCommonStore();
 commonStore.createWebSocket();
+commonStore.getStartTime();
 </script>
 
 <template>
@@ -181,7 +184,7 @@ commonStore.createWebSocket();
                 <v-text-field label="原密码*" type="password" v-model="password" required
                   variant="outlined"></v-text-field>
 
-                <v-text-field label="新用户名" type="password" v-model="newUsername" required
+                <v-text-field label="新用户名" v-model="newUsername" required
                   variant="outlined"></v-text-field>
 
                 <v-text-field label="新密码" type="password" v-model="newPassword" required

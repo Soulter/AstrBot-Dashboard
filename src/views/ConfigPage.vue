@@ -46,6 +46,18 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                   <v-tab v-for="(item, index) in config_data?.platform" :key="index" :value="index">
                     {{ item.id }}({{ item.name }})
                   </v-tab>
+                  <v-menu>
+                    <template v-slot:activator="{ props }">
+                      <v-btn variant="plain" size="large" v-bind="props">
+                        <v-icon>mdi-plus</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list @update:selected="addPlatformAdapter($event)">
+                      <v-list-item v-for="(item, index) in adapter_config_tmpl" :key="index" :value="index">
+                        <v-list-item-title>{{ index }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
                 </v-tabs>
                 <v-tabs-window v-model="tabPlatform">
                   <v-tabs-window-item v-for="(platform, index) in config_data?.platform" v-show="tabPlatform === index"
@@ -81,14 +93,13 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                 <h3>大语言模型提供商</h3>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
-                <v-alert style="margin: 8px" text="提供商支持多实例部署，点击加号即可添加新的实例。使用 `/provider` 指令可切换提供商实例。如果想要删除，请切换至代码模式手动删除（慎重）。" title="💡小提示"
+                <v-alert style="margin: 8px" text="点击加号即可添加新的提供商实例。使用 `/provider` 指令可切换提供商实例。如果想要删除，请切换至代码模式手动删除（慎重！）。下方括号当中的意思是此提供商使用该 `API 请求器` 来请求 LLM 服务。" title="💡小提示"
                   type="info" variant="tonal">
                 </v-alert>
-                <v-tabs v-model="tabLLM" align-tabs="left" color="deep-purple-accent-4">
-                  <v-tab v-for="(item, index) in config_data?.llm" :key="index" :value="index">
-                    {{ item.id }}({{ item.name }})
+                <v-tabs v-model="tabProvider" align-tabs="left" color="deep-purple-accent-4">
+                  <v-tab v-for="(item, index) in config_data?.provider" :key="index" :value="index">
+                    {{ item.id }}({{ item.type }})
                   </v-tab>
-                  <!-- 添加按钮 -->
                   <v-menu>
                     <template v-slot:activator="{ props }">
                       <v-btn variant="plain" size="large" v-bind="props">
@@ -103,11 +114,11 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                   </v-menu>
 
                 </v-tabs>
-                <v-tabs-window v-model="tabLLM">
-                  <v-tabs-window-item v-for="(llm, index) in config_data?.llm" v-show="tabLLM === index" :key="index"
+                <v-tabs-window v-model="tabProvider">
+                  <v-tabs-window-item v-for="(provider, index) in config_data?.provider" v-show="tabProvider === index" :key="index"
                     :value="index">
                     <v-container>
-                      <AstrBotConfig :metadata="metadata" :iterable="llm" metadataKey="llm"></AstrBotConfig>
+                      <AstrBotConfig :metadata="metadata" :iterable="provider" metadataKey="provider"></AstrBotConfig>
                     </v-container>
                   </v-tabs-window-item>
                 </v-tabs-window>
@@ -119,7 +130,7 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                 <h3>大语言模型通用配置</h3>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
-                <AstrBotConfig :metadata="metadata" :iterable="config_data?.llm_settings" metadataKey="llm_settings">
+                <AstrBotConfig :metadata="metadata" :iterable="config_data?.provider_settings" metadataKey="provider_settings">
                 </AstrBotConfig>
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -138,18 +149,18 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                 <!-- TODO: 兼容到 AstrBotConfig -->
                 <div style="display: flex; align-items: center; justify-content: center; gap: 16px">
                   <div style="width: 100%;">
-                    <v-select v-if="metadata[key]?.options" v-model="config_data[key]" variant="outlined"
+                    <v-select v-if="metadata[key]?.options && !metadata[key]?.invisible" v-model="config_data[key]" variant="outlined"
                       :items="metadata[key]?.options" :label="metadata[key]?.description + '(' + key + ')'"
                       dense></v-select>
-                    <v-text-field v-else-if="metadata[key]?.type === 'string'" v-model="config_data[key]"
+                    <v-text-field v-else-if="metadata[key]?.type === 'string' && !metadata[key]?.invisible" v-model="config_data[key]"
                       :label="metadata[key]?.description + '(' + key + ')'" variant="outlined" dense></v-text-field>
-                    <v-text-field v-else-if="metadata[key]?.type === 'int'" v-model="config_data[key]"
+                    <v-text-field v-else-if="metadata[key]?.type === 'int' && !metadata[key]?.invisible" v-model="config_data[key]"
                       :label="metadata[key]?.description + '(' + key + ')'" variant="outlined" dense></v-text-field>
-                    <v-textarea v-else-if="metadata[key]?.type === 'text'" v-model="config_data[key]"
+                    <v-textarea v-else-if="metadata[key]?.type === 'text' && !metadata[key]?.invisible" v-model="config_data[key]"
                       :label="metadata[key]?.description + '(' + key + ')'" variant="outlined" dense></v-textarea>
-                    <v-switch v-else-if="metadata[key]?.type === 'bool'" v-model="config_data[key]"
+                    <v-switch v-else-if="metadata[key]?.type === 'bool' && !metadata[key]?.invisible" v-model="config_data[key]"
                       :label="metadata[key]?.description + '(' + key + ')'" color="primary" inset></v-switch>
-                    <v-combobox variant="outlined" v-else-if="metadata[key]?.type === 'list'" v-model="config_data[key]"
+                    <v-combobox variant="outlined" v-else-if="metadata[key]?.type === 'list' && !metadata[key]?.invisible" v-model="config_data[key]"
                       chips clearable :label="metadata[key]?.description + '(' + key + ')'" multiple
                       prepend-icon="mdi-tag-multiple-outline">
                       <template v-slot:selection="{ attrs, item, select, selected }">
@@ -160,7 +171,7 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                       </template>
                     </v-combobox>
                   </div>
-                  <div v-if="metadata[key]?.hint && metadata[key]?.type !== 'object'">
+                  <div v-if="metadata[key]?.hint && metadata[key]?.type !== 'object' && !metadata[key]?.invisible">
                     <v-btn icon size="x-small" style="margin-bottom: 22px;">
                       <v-icon size="x-small">mdi-help</v-icon>
                       <v-tooltip activator="parent" location="start">{{ metadata[key]?.hint
@@ -223,24 +234,19 @@ export default {
       config_data_has_changed: false,
       config_data_str: "",
       config_data: {
-        config: {
-          platform: [],
-          llm: [],
-          platform_settings: {},
-          content_safety: {},
-          llm_settings: {},
-        }
+        config: {}
       },
       fetched: false,
       metadata: {},
       provider_config_tmpl: {},
+      adapter_config_tmpl: {}, // 平台适配器
       save_message_snack: false,
       save_message: "",
       save_message_success: "",
       namespace: "",
       tab: 0,
       tabPlatform: 0,
-      tabLLM: 0,
+      tabProvider: 0,
       tabs_key: ["消息平台", "大语言模型", "其他配置"],
       common_configs_key: [],
       editorTab: 0, // 0: visual, 1: code
@@ -257,8 +263,17 @@ export default {
         this.fetched = true
         this.metadata = res.data.data.metadata;
         this.provider_config_tmpl = res.data.data.provider_config_tmpl;
+        this.adapter_config_tmpl = res.data.data.adapter_config_tmpl;
         for (let key in this.config_data) {
-          if (key != "platform" && key != "llm" && key != "platform_settings" && key != "llm_settings" && key != "content_safety") {
+          if (key != "platform" && 
+              key != "provider" && 
+              key != "platform_settings" && 
+              key != "provider_settings" && 
+              key != "content_safety" && 
+              key != "project_atri" &&
+              key != "config_version" &&
+              key != "dashboard"
+            ) {
             this.common_configs_key.push(key);
           }
         }
@@ -307,13 +322,16 @@ export default {
     addProvider(val) {
       console.log(val);
       let provider = JSON.parse(JSON.stringify(this.provider_config_tmpl[val]));
-      provider.id = "new_" + val + this.config_data.llm.length;
-      this.config_data.llm.push(provider);
-      this.tabLLM = this.config_data.llm.length - 1;
+      provider.id = "new_" + val + this.config_data.provider.length;
+      this.config_data.provider.push(provider);
+      this.tabProvider = this.config_data.provider.length - 1;
     },
-    deleteProvider() {
-      this.config_data.llm.splice(this.tabLLM, 1);
-      this.tabLLM = 0;
+    addPlatformAdapter(val) {
+      console.log(val);
+      let adapter = JSON.parse(JSON.stringify(this.adapter_config_tmpl[val]));
+      adapter.id = "new_" + val + this.config_data.platform.length;
+      this.config_data.platform.push(adapter);
+      this.tabPlatform = this.config_data.platform.length - 1;
     }
   },
 }

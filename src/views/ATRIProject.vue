@@ -4,8 +4,8 @@
 
 <template>
   <v-alert style="margin-bottom: 16px"
-    text="这是一个长期实验性项目，目标是实现更具人类机能的 LLM 对话。测试功能包括但不限于：更像人类的回答、长短期记忆（不是 LSTM）、视觉理解与回复、基于兴趣的主动话题展开、TTS。"
-    title="💡这是一个长期实验性项目" type="info" variant="tonal">
+    text="这是一个长期实验性功能，目标是实现更具人类机能的 LLM 对话。推荐使用 gpt-4o-mini 作为文本生成和视觉理解模型，成本很低。推荐使用 text-embedding-3-small 作为 Embedding 模型，成本忽略不计。"
+    title="💡实验性功能" type="info" variant="tonal">
   </v-alert>
   <v-card>
     <v-card-text>
@@ -16,16 +16,25 @@
       </v-container>
     </v-card-text>
   </v-card>
+
+  <v-btn icon="mdi-content-save" size="x-large" style="position: fixed; right: 52px; bottom: 52px;" color="darkprimary"
+    @click="updateConfig">
+  </v-btn>
+  <v-snackbar :timeout="3000" elevation="24" :color="save_message_success" v-model="save_message_snack">
+    {{ save_message }}
+  </v-snackbar>
+  <WaitingForRestart ref="wfr"></WaitingForRestart>
 </template>
 
 <script>
 import axios from 'axios';
 import AstrBotConfig from '@/components/shared/AstrBotConfig.vue';
-
+import WaitingForRestart from '@/components/shared/WaitingForRestart.vue';
 export default {
   name: 'AtriProject',
   components: {
-    AstrBotConfig
+    AstrBotConfig,
+    WaitingForRestart
   },
   data() {
     return {
@@ -55,7 +64,7 @@ export default {
     },
     updateConfig() {
       if (!this.fetched) return;
-      axios.post('/api/config/astrbot/update', this.config_data).then((res) => {
+      axios.post('/api/config/astrbot/update', this.project_atri_config).then((res) => {
         if (res.data.status === "ok") {
           this.save_message = res.data.message;
           this.save_message_snack = true;

@@ -19,14 +19,17 @@ import axios from 'axios';
     </v-col>
     <v-col cols="12" md="6" lg="4" v-for="extension in extension_data.data">
       <ExtensionCard :key="extension.name" :title="extension.name" :link="extension.repo" style="margin-bottom: 4px;">
-        <p style="min-height: 150px; max-height: 150px; overflow: hidden;">{{ extension.desc }}</p>
+        <p style="min-height: 130px; max-height: 130px; overflow: none;">{{ extension.desc }}</p>
         <div class="d-flex align-center gap-2">
           <v-icon>mdi-account</v-icon>
           <span>{{ extension.author }}</span>
           <v-spacer></v-spacer>
-          <v-btn variant="plain" @click="openExtensionConfig(extension.name)">配置</v-btn>
-          <v-btn variant="plain" @click="updateExtension(extension.name)">更新</v-btn>
-          <v-btn variant="plain" @click="uninstallExtension(extension.name)">卸载</v-btn>
+          <div v-if="!extension.reserved">
+            <v-btn variant="plain" @click="openExtensionConfig(extension.name)">配置</v-btn>
+            <v-btn variant="plain" @click="updateExtension(extension.name)">更新</v-btn>
+            <v-btn variant="plain" @click="uninstallExtension(extension.name)">卸载</v-btn>
+          </div>
+          <span v-else>保留插件</span>
         </div>
       </ExtensionCard>
     </v-col>
@@ -37,7 +40,7 @@ import axios from 'axios';
     </v-col>
     <v-col cols="12" md="6" lg="4" v-for="plugin in pluginMarketData">
       <ExtensionCard :key="plugin.name" :title="plugin.name" :link="plugin.repo" style="margin-bottom: 4px;">
-        <p style="min-height: 150px; max-height: 150px; overflow: hidden;">{{ plugin.desc }}</p>
+        <p style="min-height: 130px; max-height: 130px; overflow: hidden;">{{ plugin.desc }}</p>
         <div class="d-flex align-center gap-2">
           <v-icon>mdi-account</v-icon>
           <span>{{ plugin.author }}</span>

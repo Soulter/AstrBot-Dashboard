@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import axios from 'axios';
 
 export const useCommonStore = defineStore({
   id: 'common',
@@ -6,7 +7,8 @@ export const useCommonStore = defineStore({
     // @ts-ignore
     websocket: null,
     log_cache: [],
-    log_cache_max_len: 1000
+    log_cache_max_len: 1000,
+    startTime: -1,
   }),
   actions: {
     createWebSocket() {
@@ -28,6 +30,14 @@ export const useCommonStore = defineStore({
     },
     getLogCache() {
       return this.log_cache
-    }
+    },
+    getStartTime() {
+      if (this.startTime !== -1) {
+        return this.startTime
+      }
+      axios.get('/api/stat/start-time').then((res) => {
+          this.startTime = res.data.data.start_time
+      })
+    },
   }
 });
