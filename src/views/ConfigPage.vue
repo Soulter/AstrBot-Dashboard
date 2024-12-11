@@ -29,75 +29,22 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
   <!-- 可视化编辑 -->
   <v-card v-if="editorTab === 0">
     <v-tabs v-model="tab" align-tabs="left" color="deep-purple-accent-4">
-      <v-tab v-for="(item, index) in tabs_key" :key="index" :value="index" style="font-weight: 1000; font-size: 15px">
-        {{ item }}
+      <v-tab v-for="(val, key, index) in metadata" :key="index" :value="index" style="font-weight: 1000; font-size: 15px">
+        {{ metadata[key]['name'] }}
       </v-tab>
     </v-tabs>
     <v-tabs-window v-model="tab">
-      <v-tabs-window-item v-if="tab === 0">
+      <v-tabs-window-item v-for="(val, key, index) in metadata" v-show="index == tab" :key="index">
         <v-container fluid>
           <v-expansion-panels variant="accordion">
-            <v-expansion-panel>
+            <v-expansion-panel v-for="(val2, key2, index2) in metadata[key]['metadata']">
               <v-expansion-panel-title>
-                <h3>消息平台适配器</h3>
+                <h3>{{metadata[key]['metadata'][key2]['description']}}</h3>
               </v-expansion-panel-title>
-              <v-expansion-panel-text>
-                <v-tabs style="margin-top: 16px;" v-model="tabPlatform" align-tabs="left" color="deep-purple-accent-4">
-                  <v-tab v-for="(item, index) in config_data?.platform" :key="index" :value="index">
-                    {{ item.id }}({{ item.name }})
-                  </v-tab>
-                  <v-menu>
-                    <template v-slot:activator="{ props }">
-                      <v-btn variant="plain" size="large" v-bind="props">
-                        <v-icon>mdi-plus</v-icon>
-                      </v-btn>
-                    </template>
-                    <v-list @update:selected="addPlatformAdapter($event)">
-                      <v-list-item v-for="(item, index) in adapter_config_tmpl" :key="index" :value="index">
-                        <v-list-item-title>{{ index }}</v-list-item-title>
-                      </v-list-item>
-                    </v-list>
-                  </v-menu>
-                </v-tabs>
-                <v-tabs-window v-model="tabPlatform">
-                  <v-tabs-window-item v-for="(platform, index) in config_data?.platform" v-show="tabPlatform === index"
-                    :key="index" :value="index">
-                    <v-container>
-                      <AstrBotConfig :metadata="metadata" :iterable="platform" metadataKey="platform"></AstrBotConfig>
-                    </v-container>
-                  </v-tabs-window-item>
-                </v-tabs-window>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-
-            <v-expansion-panel>
-              <v-expansion-panel-title>
-                <h3>消息平台通用配置</h3>
-              </v-expansion-panel-title>
-              <v-expansion-panel-text>
-                <AstrBotConfig :metadata="metadata" :iterable="config_data?.platform_settings"
-                  metadataKey="platform_settings">
-                </AstrBotConfig>
-                <AstrBotConfig :metadata="metadata" :iterable="config_data?.content_safety"
-                  metadataKey="content_safety"></AstrBotConfig>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </v-container>
-      </v-tabs-window-item>
-      <v-tabs-window-item v-if="tab === 1">
-        <v-container fluid>
-          <v-expansion-panels variant="accordion">
-            <v-expansion-panel>
-              <v-expansion-panel-title>
-                <h3>大语言模型提供商</h3>
-              </v-expansion-panel-title>
-              <v-expansion-panel-text>
-                <v-alert style="margin: 8px" text="点击加号即可添加新的提供商实例。使用 `/provider` 指令可切换提供商实例。如果想要删除，请切换至代码模式手动删除（慎重！）。下方括号当中的意思是此提供商使用该 `API 请求器` 来请求 LLM 服务。" title="💡小提示"
-                  type="info" variant="tonal">
-                </v-alert>
-                <v-tabs v-model="tabProvider" align-tabs="left" color="deep-purple-accent-4">
-                  <v-tab v-for="(item, index) in config_data?.provider" :key="index" :value="index">
+              <v-expansion-panel-text v-if="metadata[key]['metadata'][key2]?.config_template">
+                <!-- 带有 config_template 的配置项 -->
+                <v-tabs style="margin-top: 16px;" align-tabs="left" color="deep-purple-accent-4" v-model="config_template_tab">
+                  <v-tab v-for="(item, index) in config_data[key2]" :key="index" :value="index">
                     {{ item.id }}({{ item.type }})
                   </v-tab>
                   <v-menu>
@@ -106,85 +53,31 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                         <v-icon>mdi-plus</v-icon>
                       </v-btn>
                     </template>
-                    <v-list @update:selected="addProvider($event)">
-                      <v-list-item v-for="(item, index) in provider_config_tmpl" :key="index" :value="index">
+                    <v-list @update:selected="addFromDefaultConfigTmpl($event, key, key2)">
+                      <v-list-item v-for="(item, index) in metadata[key]['metadata'][key2]?.config_template" :key="index" :value="index">
                         <v-list-item-title>{{ index }}</v-list-item-title>
                       </v-list-item>
                     </v-list>
                   </v-menu>
-
                 </v-tabs>
-                <v-tabs-window v-model="tabProvider">
-                  <v-tabs-window-item v-for="(provider, index) in config_data?.provider" v-show="tabProvider === index" :key="index"
-                    :value="index">
+                <v-tabs-window v-model="config_template_tab">
+                  <v-tabs-window-item v-for="(config_item, index) in config_data[key2]" v-show="config_template_tab === index"
+                    :key="index" :value="index">
                     <v-container>
-                      <AstrBotConfig :metadata="metadata" :iterable="provider" metadataKey="provider"></AstrBotConfig>
+                      <AstrBotConfig :metadata="metadata[key]['metadata']" :iterable="config_item" :metadataKey="key2"></AstrBotConfig>
                     </v-container>
                   </v-tabs-window-item>
                 </v-tabs-window>
               </v-expansion-panel-text>
-            </v-expansion-panel>
-
-            <v-expansion-panel>
-              <v-expansion-panel-title>
-                <h3>大语言模型通用配置</h3>
-              </v-expansion-panel-title>
-              <v-expansion-panel-text>
-                <AstrBotConfig :metadata="metadata" :iterable="config_data?.provider_settings" metadataKey="provider_settings">
-                </AstrBotConfig>
+              <v-expansion-panel-text v-else>
+                <AstrBotConfig :metadata="metadata[key]['metadata']" :iterable="config_data" :metadataKey="key2"></AstrBotConfig>
               </v-expansion-panel-text>
             </v-expansion-panel>
+
           </v-expansion-panels>
         </v-container>
       </v-tabs-window-item>
-      <v-tabs-window-item v-if="tab === 2">
-        <v-container fluid>
-          <v-expansion-panels variant="accordion">
-            <v-expansion-panel v-for="key in common_configs_key" :key="key">
-              <v-expansion-panel-title>
-                <h3>{{ metadata[key]?.description }}</h3>
-              </v-expansion-panel-title>
-              <v-expansion-panel-text>
 
-                <!-- TODO: 兼容到 AstrBotConfig -->
-                <div style="display: flex; align-items: center; justify-content: center; gap: 16px">
-                  <div style="width: 100%;">
-                    <v-select v-if="metadata[key]?.options && !metadata[key]?.invisible" v-model="config_data[key]" variant="outlined"
-                      :items="metadata[key]?.options" :label="metadata[key]?.description + '(' + key + ')'"
-                      dense></v-select>
-                    <v-text-field v-else-if="metadata[key]?.type === 'string' && !metadata[key]?.invisible" v-model="config_data[key]"
-                      :label="metadata[key]?.description + '(' + key + ')'" variant="outlined" dense></v-text-field>
-                    <v-text-field v-else-if="metadata[key]?.type === 'int' && !metadata[key]?.invisible" v-model="config_data[key]"
-                      :label="metadata[key]?.description + '(' + key + ')'" variant="outlined" dense></v-text-field>
-                    <v-textarea v-else-if="metadata[key]?.type === 'text' && !metadata[key]?.invisible" v-model="config_data[key]"
-                      :label="metadata[key]?.description + '(' + key + ')'" variant="outlined" dense></v-textarea>
-                    <v-switch v-else-if="metadata[key]?.type === 'bool' && !metadata[key]?.invisible" v-model="config_data[key]"
-                      :label="metadata[key]?.description + '(' + key + ')'" color="primary" inset></v-switch>
-                    <v-combobox variant="outlined" v-else-if="metadata[key]?.type === 'list' && !metadata[key]?.invisible" v-model="config_data[key]"
-                      chips clearable :label="metadata[key]?.description + '(' + key + ')'" multiple
-                      prepend-icon="mdi-tag-multiple-outline">
-                      <template v-slot:selection="{ attrs, item, select, selected }">
-                        <v-chip v-bind="attrs" :model-value="selected" closable @click="select"
-                          @click:close="remove(item)">
-                          <strong>{{ item }}</strong>
-                        </v-chip>
-                      </template>
-                    </v-combobox>
-                  </div>
-                  <div v-if="metadata[key]?.hint && metadata[key]?.type !== 'object' && !metadata[key]?.invisible">
-                    <v-btn icon size="x-small" style="margin-bottom: 22px;">
-                      <v-icon size="x-small">mdi-help</v-icon>
-                      <v-tooltip activator="parent" location="start">{{ metadata[key]?.hint
-                        }}</v-tooltip>
-                    </v-btn>
-                  </div>
-                </div>
-
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </v-container>
-      </v-tabs-window-item>
 
       <div style="margin-left: 16px; padding-bottom: 16px">
         <small>不了解配置？请见 <a
@@ -245,11 +138,9 @@ export default {
       save_message_success: "",
       namespace: "",
       tab: 0,
-      tabPlatform: 0,
-      tabProvider: 0,
-      tabs_key: ["消息平台", "大语言模型", "其他配置"],
-      common_configs_key: [],
       editorTab: 0, // 0: visual, 1: code
+
+      config_template_tab: 0,
     }
   },
   mounted() {
@@ -264,19 +155,6 @@ export default {
         this.metadata = res.data.data.metadata;
         this.provider_config_tmpl = res.data.data.provider_config_tmpl;
         this.adapter_config_tmpl = res.data.data.adapter_config_tmpl;
-        for (let key in this.config_data) {
-          if (key != "platform" && 
-              key != "provider" && 
-              key != "platform_settings" && 
-              key != "provider_settings" && 
-              key != "content_safety" && 
-              key != "project_atri" &&
-              key != "config_version" &&
-              key != "dashboard"
-            ) {
-            this.common_configs_key.push(key);
-          }
-        }
       }).catch((err) => {
         save_message = err;
         save_message_snack = true;
@@ -319,19 +197,14 @@ export default {
         this.save_message_snack = true;
       }
     },
-    addProvider(val) {
+    addFromDefaultConfigTmpl(val, group_name, config_item_name) {
       console.log(val);
-      let provider = JSON.parse(JSON.stringify(this.provider_config_tmpl[val]));
-      provider.id = "new_" + val + this.config_data.provider.length;
-      this.config_data.provider.push(provider);
-      this.tabProvider = this.config_data.provider.length - 1;
-    },
-    addPlatformAdapter(val) {
-      console.log(val);
-      let adapter = JSON.parse(JSON.stringify(this.adapter_config_tmpl[val]));
-      adapter.id = "new_" + val + this.config_data.platform.length;
-      this.config_data.platform.push(adapter);
-      this.tabPlatform = this.config_data.platform.length - 1;
+
+      let tmpl = this.metadata[group_name]['metadata'][config_item_name]['config_template'][val];
+      let new_tmpl_cfg = JSON.parse(JSON.stringify(tmpl));
+      new_tmpl_cfg.id = "new_" + val + "_" + this.config_data[config_item_name].length;
+      this.config_data[config_item_name].push(new_tmpl_cfg);
+      this.config_template_tab = this.config_data[config_item_name].length - 1;
     }
   },
 }
