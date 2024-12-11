@@ -35,11 +35,11 @@ const sidebarItem: menu[] = [
     icon: 'mdi-console',
     to: '/console'
   },
-  {
-    title: 'Project ATRI',
-    icon: 'mdi-grain',
-    to: '/project-atri'
-  },
+  // {
+  //   title: 'Project ATRI',
+  //   icon: 'mdi-grain',
+  //   to: '/project-atri'
+  // },
 ];
 
 export default sidebarItem;
