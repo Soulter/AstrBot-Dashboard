@@ -70,7 +70,9 @@ import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
                 </v-tabs-window>
               </v-expansion-panel-text>
               <v-expansion-panel-text v-else>
-                <AstrBotConfig :metadata="metadata[key]['metadata']" :iterable="config_data" :metadataKey="key2"></AstrBotConfig>
+                <!-- 如果配置项是一个 object，那么 iterable 需要取到这个 object 的值，否则取到整个 config_data -->
+                <AstrBotConfig v-if="metadata[key]['metadata'][key2]['type'] == 'object'" :metadata="metadata[key]['metadata']" :iterable="config_data[key2]" :metadataKey="key2"></AstrBotConfig>
+                <AstrBotConfig v-else :metadata="metadata[key]['metadata']" :iterable="config_data" :metadataKey="key2"></AstrBotConfig>
               </v-expansion-panel-text>
             </v-expansion-panel>
 
