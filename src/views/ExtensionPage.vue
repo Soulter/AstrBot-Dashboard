@@ -355,16 +355,15 @@ export default {
       });
     },
     fetchPluginCollection() {
-      let url = "https://soulter.github.io/AstrBot_Plugins_Collection/plugins.json"
-      axios.get(url).then((res) => {
+      axios.get('/api/plugin/market_list').then((res) => {
         let data = []
-        this.pluginMarketDataOrigin = res.data;
-        for (let key in res.data) {
+        this.pluginMarketDataOrigin = res.data.data;
+        for (let key in res.data.data) {
           data.push({
             "name": key,
-            "desc": res.data[key].desc,
-            "author": res.data[key].author,
-            "repo": res.data[key].repo,
+            "desc": res.data.data[key].desc,
+            "author": res.data.data[key].author,
+            "repo": res.data.data[key].repo,
             "installed": false
           })
         }
