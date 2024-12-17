@@ -3,6 +3,7 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  workflow_dispatch:
 
 name: Create Release
 
@@ -26,6 +27,18 @@ jobs:
           echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
           echo ${{ github.ref }} > dist/assets/version
           zip -r dist.zip dist
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.MINIO_AK }}
+          aws-secret-access-key: ${{ secrets.MINIO_SK }}
+          endpoint: ${{ secrets.MINIO_ENDPOINT }}
+
+      - name: Sync to MinIO
+        run: |
+          aws s3 sync dist.zip s3://${{ secrets.MINIO_BUCKET_NAME }}/releases/${{ github.ref }}/dist.zip --endpoint-url ${{ secrets.MINIO_ENDPOINT }}
+
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
